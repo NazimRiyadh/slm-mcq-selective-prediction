@@ -1,0 +1,313 @@
+
+%% Publish-ready Q1 journal draft generated from the current result package.
+%% Elsevier elsarticle format, suitable for Applied Soft Computing / MLWA-style submission after author metadata and repository DOI are inserted.
+\documentclass[preprint,12pt,authoryear]{elsarticle}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+\usepackage{threeparttable}
+\usepackage{placeins}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}}
+
+\journal{Applied Soft Computing}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Cost-Aware Reliability Signal Selection for Small Language Models: Selective Prediction, Hidden-State Redundancy, and Scaling Diagnostics}
+
+\author[aff1]{Nazim-E-Alam\corref{cor1}}
+\ead{email.to.be.added@example.com}
+\cortext[cor1]{Corresponding author.}
+\affiliation[aff1]{organization={Independent Researcher}, country={Bangladesh}}
+
+\begin{abstract}
+Selective prediction allows a language model to abstain when its answer is likely to be wrong. For small language models (SLMs), however, reliability signals differ not only in predictive value but also in deployment cost: confidence and option scores are cheap, hidden-state probes require white-box activation access, and repeated sampling multiplies inference latency. This paper studies the resulting deployment question: when strong confidence and option-score signals are already available, do richer hidden-state signals add enough incremental value to justify their complexity? We evaluate answerable multiple-choice question answering (MCQ), a controlled setting with automatic correctness labels and exact risk--coverage evaluation. The main study covers three sub-2B open-weight models across seven MCQ datasets. The final scaling audit adds seven accessible 7B/9B-class model families---Qwen2.5-7B-Instruct, Mistral-7B-Instruct-v0.3, Falcon3-7B-Instruct, OLMo-2-7B-Instruct, Gemma-2-9B-IT, Llama-3.1-8B-Instruct, and DeepSeek-R1-Distill-Qwen-7B---across ARC-Challenge, CommonsenseQA, HellaSwag, and MMLU, using 299--1000 examples per model--dataset case and five random seeds. Across 28 expanded model--dataset cases, confidence/option features average 0.772 AUROC, hidden summaries alone average 0.710, PCA-compressed hidden embeddings alone average 0.739, and confidence/option plus PCA-hidden embeddings average 0.777. On the six-model competent subset that excludes the DeepSeek forced-choice stress test, confidence/option features average 0.800 AUROC and confidence/option plus PCA-hidden embeddings average 0.807. A stronger supervised contrastive hidden-state probe on Gemma and Llama does not overturn the pattern: contrastive hidden-only reaches 0.746 AUROC and confidence/option plus contrastive hidden reaches 0.772, below the corresponding confidence/option baseline of 0.826. Selective-prediction metrics show the same pattern: hidden augmentation provides small operating gains but does not change the deployment recommendation. Layer localization, PCA-dimension sensitivity, group-permutation importance, redundancy analysis, sample-size sensitivity, and measured latency/VRAM diagnostics show that hidden states contain secondary reliability signal, especially in late/final layers, but that much of the deployable failure-prediction information is already expressed in option-confidence evidence. The result is not a negative claim about hidden representations; it is a cost-aware redundancy finding for MCQ SLM reliability. The practical recommendation is to begin with confidence/option-based abstention and add hidden-state probes only when target-distribution validation demonstrates stable risk--coverage gains that justify white-box access and engineering complexity.
+\end{abstract}
+
+\begin{highlights}
+\item Reframes SLM abstention as cost-aware reliability-signal selection, not merely uncertainty-score comparison.
+\item Adds expanded 7B-class scaling, fixed-coverage risk, AURC/E-AURC, PCA probes, layer localization, redundancy diagnostics, and measured cost.
+\item Shows that hidden states contain correctness signal but usually add only small incremental value over confidence/option evidence in answerable MCQ tasks.
+\item Provides a deployment rule: start with cheap confidence/option scores; deploy hidden probes only after distribution-specific validation.
+\end{highlights}
+
+\begin{keyword}
+small language models \sep selective prediction \sep abstention \sep uncertainty estimation \sep hidden states \sep reliability \sep cost-aware machine learning \sep multiple-choice question answering
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+Small language models (SLMs) are attractive for resource-constrained deployment because they reduce memory requirements, latency, and dependence on proprietary frontier-scale systems. Yet lower cost does not imply reliable decision-making. In many applications, the relevant question is not only which answer the model gives, but whether the system should answer at all. Selective prediction formalizes this decision by allowing a model to abstain on examples whose predicted risk is too high, thereby trading coverage for lower selective error \citep{geifman2017selective,geifman2019selectivenet}.
+
+Language-model reliability research offers many uncertainty signals. Confidence and option-likelihood statistics are inexpensive and available from a single scoring pass. Hidden-state probes are more expressive and may reveal internal correctness or hallucination-related information \citep{chen2024inside,orgad2024llms}. Sampling-based methods can capture answer instability or semantic inconsistency, but they require multiple generations \citep{manakul2023selfcheckgpt,farquhar2024semanticentropy}. A deployment engineer therefore faces a stricter question than whether a signal correlates with correctness: does the signal improve selective risk enough to justify its cost over strong cheap baselines?
+
+This paper answers that question in a controlled setting: answerable multiple-choice question answering (MCQ). This setting is narrower than open-ended hallucination detection, retrieval-augmented generation, tool use, or false-premise abstention. Its advantage is measurement clarity. Each example has an automatic correctness label, option scores are available, and selective risk, coverage, AURC, and E-AURC can be computed without human or LLM-as-judge uncertainty. This work should therefore be read as a controlled diagnostic study of failure prediction under forced-choice scoring, not as a general hallucination detector.
+
+Rather than introducing another abstention classifier, this study asks a deployment-facing question: when do richer reliability signals justify their additional cost over confidence and option scores? The contribution is a cost-aware empirical audit of signal redundancy. We compare confidence/option features, hidden-state summaries, PCA-compressed hidden embeddings, learned probes, layer-localized probes, sampling diagnostics, sample-size sensitivity, and measured latency/VRAM cost. The resulting evidence is intentionally practical: hidden representations contain reliability signal, but in MCQ selective prediction much of that signal is redundant with option-confidence evidence.
+
+The contributions are:
+\begin{enumerate}
+    \item We formulate MCQ SLM abstention as cost-aware reliability-signal selection, where the relevant criterion is incremental risk--coverage utility over cheap confidence/option baselines.
+    \item We evaluate three sub-2B open-weight models across seven datasets and extend the scaling audit to seven accessible 7B/9B-class model families across four representative MCQ datasets.
+    \item We compare confidence/option signals against hidden summaries, PCA-compressed raw hidden embeddings, hidden-augmented probes, layer-localized probes, PCA-dimension sensitivity, non-linear probes, and lightweight repeated sampling.
+    \item We report selective-classification metrics that match the paper title: fixed-coverage risk, retained accuracy, AURC, E-AURC, and failure capture under abstention.
+    \item We provide an operational decision rule: use hidden probes only when target-distribution validation shows stable gains large enough to justify white-box access, feature extraction, probe training, and maintenance.
+\end{enumerate}
+
+\input{tables/table_scope.tex}
+\input{tables/table_novelty.tex}
+
+\section{Related work}
+\subsection{Selective prediction and abstention}
+Selective prediction studies classifiers that can reject or abstain when predicted risk is too high. Confidence-thresholding is a natural baseline, and SelectiveNet integrates a rejection option into the model itself \citep{geifman2017selective,geifman2019selectivenet}. In language models, abstention is increasingly studied as a safety and reliability behavior. Recent surveys and benchmarks distinguish answer failure from unanswerability, false premises, ambiguity, and stale information \citep{wen2025limits,kirichenko2025abstentionbench}. Our study is narrower: all questions are answerable MCQs, and abstention is triggered by predicted answer failure.
+
+\subsection{Confidence, calibration, and uncertainty}
+Maximum softmax probability is a classical and still competitive error-detection baseline \citep{hendrycks2017baseline}. Calibration work shows that confidence values can be systematically miscalibrated even when accuracy is high \citep{guo2017calibration}. For language models, uncertainty may arise from lack of knowledge, unstable reasoning, ambiguous prompts, or decoding variability. Work on self-evaluation and MCQ uncertainty shows that models may expose useful confidence information, but that evaluation design strongly affects conclusions \citep{kadavath2022lmknow,wang2025ubench}. Our contribution is not another broad benchmark; it is a cost-aware incremental-value audit against strong confidence/option baselines.
+
+\subsection{Sampling and semantic consistency}
+Sampling-based approaches estimate uncertainty by generating multiple responses and measuring agreement or semantic consistency. Self-consistency improves reasoning by marginalizing over multiple chains of thought \citep{wang2023selfconsistency}. SelfCheckGPT and semantic entropy detect hallucination or confabulation by comparing multiple generated outputs \citep{manakul2023selfcheckgpt,farquhar2024semanticentropy}. These approaches are important for open-ended generation, but they require repeated inference. Our five-sample baseline is therefore used as a cost diagnostic rather than as a full semantic-entropy evaluation.
+
+\subsection{Hidden-state reliability signals}
+Several studies suggest that internal representations encode truthfulness, hallucination, or answer correctness information \citep{chen2024inside,orgad2024llms,ji2024internal}. This paper does not argue against that literature. Instead, it measures a deployment-specific residual question: once confidence and option scores are included, how much additional value remains in hidden-state summaries or PCA-compressed hidden embeddings? A hidden representation can be informative in isolation and still be operationally redundant when the model's option distribution already exposes the relevant uncertainty.
+
+\section{Problem formulation}
+Let $x$ denote an MCQ prompt and $A=\{a_1,\ldots,a_K\}$ denote candidate options. A language model assigns score $s(x,a_k)$ to each option and predicts
+\begin{equation}
+\hat{y}=\arg\max_{a_k\in A} s(x,a_k).
+\end{equation}
+Given ground-truth answer $y$, correctness and failure are
+\begin{equation}
+c=\mathbb{1}[\hat{y}=y], \qquad f=1-c.
+\end{equation}
+A reliability predictor receives a signal vector $z$ and estimates
+\begin{equation}
+r=P(c=1\mid z),
+\end{equation}
+where $z$ may contain confidence features, option scores, hidden-state summaries, PCA-compressed hidden embeddings, or sampling agreement. A selective policy answers when $r\geq\tau$ and abstains otherwise. Coverage and selective risk are
+\begin{equation}
+\mathrm{coverage}(\tau)=\frac{1}{n}\sum_{i=1}^{n}\mathbb{1}[r_i\geq\tau],
+\end{equation}
+\begin{equation}
+\mathrm{risk}(\tau)=\frac{\sum_i \mathbb{1}[r_i\geq\tau]\mathbb{1}[\hat{y}_i\neq y_i]}{\sum_i \mathbb{1}[r_i\geq\tau]}.
+\end{equation}
+Retained accuracy is $1-\mathrm{risk}(\tau)$. We report AUROC for failure-prediction ranking and selective-classification metrics for deployment: risk at fixed coverage, AURC, E-AURC, and failure capture at fixed abstention.
+
+\section{Experimental design}
+\subsection{Models and datasets}
+The sub-2B study uses Qwen2.5-0.5B-Instruct, Qwen2.5-1.5B-Instruct, and TinyLlama-1.1B-Chat across ARC-Challenge, ARC-Easy, OpenBookQA, CommonsenseQA, BoolQ, HellaSwag, and MMLU \citep{clark2018arc,mihaylov2018openbookqa,talmor2019commonsenseqa,clark2019boolq,zellers2019hellaswag,hendrycks2021mmlu,yang2024qwen,zhang2024tinyllama}. The expanded 7B-class audit uses Qwen2.5-7B-Instruct, Mistral-7B-Instruct-v0.3, Falcon3-7B-Instruct, OLMo-2-1124-7B-Instruct, and DeepSeek-R1-Distill-Qwen-7B \citep{yang2024qwen,jiang2023mistral,falcon3modelcard,olmo22025,deepseek2025r1}. The four scaling datasets are ARC-Challenge, CommonsenseQA, HellaSwag, and MMLU. ARC-Challenge has 299 validation examples; the other datasets use up to 1000 examples per model.
+
+\input{tables/table_base_accuracy.tex}
+
+Gemma-2-9B-IT and Llama-3.1-8B-Instruct were added after resolving gated-repository token access. DeepSeek-R1-Distill-Qwen-7B is retained as a stress test because its forced-choice option-scoring accuracy is much lower than the other instruction models. To avoid letting that protocol-mismatch case dominate the interpretation, we report both all-seven-model averages and six-model competent-subset averages.
+
+\subsection{Reliability signals}
+We compare seven feature families. First, direct max-option probability uses the model's top option probability without an additional learned selector when available. Second, confidence/option features include top probability, second probability, probability margin, logit margin, entropy, and option scores. Third, hidden summaries compute mean, standard deviation, norm, extrema, and absolute mean from final-token hidden states across selected layers. Fourth, PCA hidden embeddings use raw selected-layer hidden vectors compressed by PCA. Fifth, hidden-augmented features concatenate confidence/option features with hidden summaries or PCA embeddings. Sixth, a supervised contrastive hidden-state probe is added for Gemma and Llama to test whether weak hidden-state gains are merely a probe-strength artifact. Seventh, repeated sampling uses five stochastic generations and agreement-like features as a high-cost diagnostic.
+
+\subsection{Probes and validation protocol}
+For learned reliability prediction, we evaluate logistic regression, multilayer perceptron, ExtraTrees, and histogram-gradient boosting probes. PCA transformations are fitted only on training splits to avoid leakage. The expanded 7B-class diagnostics use five seeds: 42, 7, 123, 777, and 2025. Bootstrap intervals are computed on test predictions. Sample-size sensitivity evaluates 100, 300, 500, and 1000 examples where available. Layer localization separately tests early, middle, late, final, and all selected layers.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.98\linewidth]{fig_pipeline_q1_vector.pdf}
+    \caption{Clean vector pipeline for the cost-aware diagnostic framework. The workflow separates controlled MCQ scoring, competing reliability signals, selective-prediction evaluation, and deployment decision rules.}
+    \label{fig:pipeline}
+\end{figure}
+
+\section{Results}
+\subsection{Sub-2B study: strong cheap baselines motivate the audit}
+The sub-2B study establishes the central tension. For Qwen2.5-1.5B across seven datasets, confidence/option signals average 0.800 AUROC, while the best hidden-augmented summary family averages 0.792. Five-seed larger-sample sensitivity reaches 0.788$\pm$0.021 AUROC for confidence/option signals and 0.784$\pm$0.027 for hidden-augmented summaries. Non-linear probes over existing feature files do not reverse the conclusion: across 21 sub-2B model--dataset cases, the best confidence/option family averages 0.669 AUROC and confidence/option plus hidden summaries averages 0.663. At 70\% coverage, however, selective answering remains practically useful: Qwen2.5-1.5B improves retained accuracy by about 11.6 percentage points. These findings motivate the stronger scaling and selective-metric audit below.
+
+\subsection{Expanded 7B-class scaling: hidden probes help, but only marginally}
+The expanded audit directly addresses the reviewer concern that two 7B-class models are too few. Table~\ref{tab:overall-probes} reports feature-family AUROC across seven accessible 7B/9B-class families. Across all 28 model--dataset cases, confidence/option features obtain 0.772 mean AUROC. Hidden summaries alone obtain 0.710, and PCA hidden embeddings alone improve to 0.739. Adding hidden features to cheap signals yields only small improvements: 0.773 for confidence/option plus summaries and 0.777 for confidence/option plus PCA hidden embeddings.
+
+The six-model competent subset gives the fairest estimate for ordinary instruction models. In that subset, confidence/option features average 0.800 AUROC, while confidence/option plus PCA hidden embeddings average 0.807. The gain is real but modest: +0.008 AUROC on average. Thus the updated evidence is more nuanced than a simple negative result. Hidden probes can improve reliability prediction in several cases, but the average gain remains too small to justify default deployment without distribution-specific validation.
+
+\input{tables/table_overall_probe.tex}
+\input{tables/table_hidden_gain.tex}
+
+\subsection{Stronger contrastive hidden-state probe: probe strength does not overturn the conclusion}
+A remaining reviewer concern is that PCA or standard learned probes may be too weak to exploit hidden representations. We therefore add a supervised contrastive hidden-state probe for Gemma-2-9B-IT and Llama-3.1-8B-Instruct. The probe learns a compact representation in which correct examples and incorrect examples are separated under a contrastive objective before correctness prediction. Table~\ref{tab:contrastive} shows that this stronger hidden method does not outperform the cheap baseline in this run. Across eight Gemma/Llama model--dataset cases, confidence/option features average 0.826 AUROC, confidence/option plus PCA hidden averages 0.829, contrastive hidden-only averages 0.746, and confidence/option plus contrastive hidden averages 0.772. This result strengthens the interpretation that the hidden-state limitation is not simply caused by using a shallow probe.
+
+\input{tables/table_contrastive.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.72\linewidth]{fig_contrastive_probe.pdf}
+    \caption{Stronger supervised contrastive hidden-state probe on Gemma and Llama. Contrastive hidden features do not overturn the confidence/option baseline, supporting the redundancy interpretation.}
+    \label{fig:contrastive}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.78\linewidth]{fig_feature_family_auroc.pdf}
+    \caption{Expanded 7B-class reliability prediction by feature family. PCA hidden embeddings recover more signal than simple hidden summaries, but hidden-augmented features remain close to confidence/option baselines.}
+    \label{fig:feature-family}
+\end{figure}
+
+\subsection{Selective prediction metrics: AUROC gains translate into small operating gains}
+A paper titled around selective prediction should not rely only on AUROC. Table~\ref{tab:selective-fixed} reports fixed-coverage risk, AURC, E-AURC, and failure capture. Across all seven model families, confidence/option and confidence/option plus PCA hidden remain close in fixed-coverage risk and AURC. In the competent subset, AURC changes only modestly and risk at 80\% coverage remains nearly unchanged. These are useful but small deployment gains.
+
+This selective-metric view is central to the paper's claim. Hidden features are not useless; they can slightly improve operating curves. But the operational benefit is modest enough that hidden probes should be validated on the target distribution rather than adopted automatically.
+
+\input{tables/table_selective_fixed.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.74\linewidth]{fig_selective_fixed_coverage.pdf}
+    \caption{Selective risk at fixed coverage. Hidden augmentation changes operating risk only slightly compared with confidence/option-based selection.}
+    \label{fig:selective-fixed}
+\end{figure}
+
+\subsection{Layer localization: hidden reliability signal exists, especially late}
+Layer analysis explains why the result is not a trivial rejection of hidden states. Table~\ref{tab:layer-localization} shows that hidden-only AUROC increases substantially from early layers to late/final layers. In the competent subset, early-layer hidden-only AUROC is 0.590, late-layer AUROC is 0.749, and final-layer AUROC is 0.759. This is consistent with the view that later representations encode more answer-specific reliability information. However, adding these hidden features to confidence/option signals does not produce large average gains. The result is therefore a redundancy finding: hidden states carry correctness signal, but much of it overlaps with option-confidence evidence.
+
+\input{tables/table_layer_localization.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.72\linewidth]{fig_layer_localization_gain.pdf}
+    \caption{Layer-wise localization of hidden reliability signal. Later layers are more informative as hidden-only features, but their incremental value over confidence/option features remains limited.}
+    \label{fig:layer-localization}
+\end{figure}
+
+\subsection{PCA-dimension sensitivity: more hidden variance does not mean more utility}
+If hidden underperformance were caused by overly aggressive compression, increasing PCA dimensionality should improve hidden-augmented performance. Table~\ref{tab:pca-dim} shows the opposite. Across all seven models, 8 PCA dimensions produce only a small positive gain (+0.001), while 64, 128, and 256 dimensions reduce mean performance relative to the cheap baseline. The competent subset shows the same qualitative pattern. Retaining more hidden variance therefore does not automatically yield more independent reliability information; it can introduce noise or overfitting relative to the cheap feature space.
+
+\input{tables/table_pca_dim.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.75\linewidth]{fig_pca_gain_sensitivity.pdf}
+    \caption{Incremental hidden-state gain across PCA dimensions. Increasing hidden dimensionality does not reliably improve the hidden-augmented selector.}
+    \label{fig:pca-gain}
+\end{figure}
+
+\subsection{Feature importance and redundancy: why option-confidence dominates}
+Group-permutation and redundancy diagnostics explain the mechanism behind the small gains. Table~\ref{tab:importance-redundancy} shows that permuting the confidence/option group causes a larger AUROC drop than permuting the PCA-hidden group. In the fixed logistic redundancy diagnostic, the combined feature set can underperform the cheap feature set. This does not mean hidden features lack information; it means the added information is partly redundant and can increase estimator variance. The diagnostic supports the paper's deployment rule: measure incremental utility, not only isolated predictiveness.
+
+\input{tables/table_importance_redundancy.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.72\linewidth]{fig_group_importance.pdf}
+    \caption{Group-permutation importance in the combined predictor. Confidence/option features make the larger independent contribution.}
+    \label{fig:group-importance}
+\end{figure}
+
+\subsection{Sample-size sensitivity: the conclusion is not driven by small subsets}
+Table~\ref{tab:sample-size} reports sample-size sensitivity from 100 to 1000 examples per condition in the earlier five-model audit. The newly added Gemma and Llama runs use the larger 299--1000-example setting directly. The sensitivity analysis remains useful because it shows that larger subsets narrow uncertainty but do not make hidden-augmented probes decisively dominate confidence/option signals.
+
+\input{tables/table_sample_size.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.78\linewidth]{fig_sample_size_sensitivity.pdf}
+    \caption{Sample-size sensitivity. Increasing sample size improves stability but preserves the small-gap conclusion.}
+    \label{fig:sample-size}
+\end{figure}
+
+\subsection{Latency and memory diagnostics: hidden readout is low-latency but not free}
+Table~\ref{tab:latency} reports measured cost diagnostics. Hidden-state readout adds small single-pass latency overhead for the accessible models, whereas five-sample generation is substantially more expensive. This changes the interpretation: the main reason not to deploy hidden probes by default is not necessarily per-example latency. It is the combination of white-box access, activation handling, feature storage, probe training, validation burden, and small incremental risk--coverage gains. Repeated sampling has a clearer inference-time cost and is not cost-effective in this MCQ protocol, though this should not be generalized to full semantic entropy or long-form self-consistency.
+
+\input{tables/table_latency.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.78\linewidth]{fig_latency_vram_cost.pdf}
+    \caption{Measured latency and memory diagnostics. Hidden readout is close to single-pass scoring, while repeated generation is much more expensive.}
+    \label{fig:latency}
+\end{figure}
+
+\FloatBarrier
+\section{Discussion}
+\subsection{The main insight: redundancy, not absence of signal}
+The strongest scientific interpretation is not that hidden states are uninformative. The evidence shows the opposite: PCA hidden embeddings outperform summary-only hidden features, and later layers contain stronger hidden-only reliability signal. The central finding is redundancy. In forced-choice MCQ scoring, probability margin, entropy, and option likelihoods already summarize much of the model's separation between the chosen answer and alternatives. Hidden features add secondary signal, but much of that signal overlaps with option-confidence evidence. This explains why hidden-augmented probes can improve AUROC in some cases while producing only small average selective-risk gains.
+
+\subsection{Why the expanded experiments strengthen novelty}
+The updated experiments directly address the earlier reviewer concerns. The study now includes a seven-family 7B/9B-class audit rather than a two-model check, reports fixed-coverage risk and AURC/E-AURC rather than relying only on AUROC, evaluates sample sizes up to 1000 examples, adds Gemma and Llama, includes a stronger contrastive hidden-state probe, and explains the hidden-state result through PCA sensitivity, layer localization, group importance, and redundancy diagnostics. The contribution is therefore not a generic statement that ``simple baselines are strong''. It is a cost-aware audit showing when a richer reliability signal is operationally redundant under a constrained scoring interface.
+
+\subsection{Deployment rule}
+For answerable MCQ deployment with open-weight SLMs, the recommended procedure is:
+\begin{enumerate}
+    \item start with confidence, margin, entropy, and option scores;
+    \item evaluate fixed-coverage risk, AURC, E-AURC, and failure capture on the validation distribution;
+    \item add hidden-state probes only if they provide stable gains across seeds or related datasets, for example at least 0.02 AUROC or a practically meaningful AURC reduction;
+    \item measure white-box access constraints, activation-storage cost, latency, memory, and maintenance burden;
+    \item treat repeated sampling as a separate high-cost option rather than a default reliability baseline.
+\end{enumerate}
+The exact gain threshold is application-dependent. The important point is that hidden probes should be justified by incremental operating value, not by isolated hidden-only predictiveness.
+
+\section{Threats to validity}
+First, all primary tasks are answerable MCQs with automatic labels. This design enables rigorous selective-prediction evaluation but does not cover open-ended hallucination, RAG, summarization, tool use, or false-premise abstention. Second, although the expanded audit includes seven 7B/9B-class model families, it is not a scaling law over all SLMs, base models, 14B models, or frontier systems. Third, DeepSeek-R1-Distill-Qwen-7B performs poorly under direct forced-choice option scoring in this implementation; it is treated as a protocol stress test and not as a claim about the model's general reasoning ability. Fourth, the hidden-state analysis covers summaries, PCA embeddings, layer localization, standard learned probes, and a supervised contrastive probe on Gemma/Llama, but not sparse autoencoders, causal activation directions, attention-spectral features, or mechanistic interventions. Fifth, the five-sample baseline is lightweight and should not be read as a full semantic-entropy or chain-of-thought self-consistency evaluation. Sixth, latency and VRAM are hardware- and implementation-specific. The relative overheads are informative, but deployment studies should remeasure them under target batching, quantization, context length, and hardware conditions.
+
+\section{Reproducibility and submission readiness}
+\input{tables/table_reproducibility.tex}
+Before journal submission, the author should replace the email placeholder and insert a permanent repository/archive link. All reported tables and figures in this draft are generated from the current result package; however, Q1 review standards require public code, configurations, random seeds, environment files, and generated outputs.
+
+\section{Conclusion}
+This paper studied cost-aware reliability-signal selection for MCQ SLM selective prediction. Across sub-2B models and an expanded seven-family 7B/9B-class audit, confidence and option-score features remain strong and inexpensive baselines. Hidden states clearly contain reliability information: PCA hidden embeddings are stronger than summary-only features, and late/final layers carry more hidden-only signal than early layers. Yet the incremental value of hidden augmentation over confidence/option features is small: +0.004 AUROC over all expanded cases and +0.008 on the competent subset, with only modest AURC improvements. The practical implication is conservative but useful: for answerable MCQ SLM deployment, start with confidence/option-based abstention, report selective risk rather than only AUROC, and add hidden-state probes only when target-distribution validation demonstrates a meaningful operating gain that justifies white-box complexity.
+
+\section*{CRediT authorship contribution statement}
+Nazim-E-Alam: Conceptualization, methodology, software, validation, formal analysis, investigation, visualization, writing -- original draft, writing -- review and editing.
+
+\section*{Declaration of competing interest}
+The author declares no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Data and code availability}
+The experiments use publicly available model checkpoints and benchmark datasets. Processed result tables, feature summaries, figures, and analysis outputs are included in the supplementary package accompanying this manuscript draft. The final public GitHub repository URL and permanent Zenodo/OSF DOI should be inserted before journal submission.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the writing process}
+During preparation of this manuscript, AI-assisted writing support was used to organize structure, improve language, and format tables and figures. The author reviewed and edited the content, verified the reported numerical results against the experiment outputs, and takes full responsibility for the final manuscript.
+
+\section*{Funding}
+No external funding was received for this work.
+
+\section*{Acknowledgements}
+The author thanks the open-source model, dataset, and software communities for enabling reproducible small-language-model reliability research.
+
+\begin{thebibliography}{99}
+\bibitem[Chen et~al.(2024)]{chen2024inside} Chen, C., Liu, K., Chen, Z., Gu, Y., Wu, Y., Tao, M., Fu, Z., Ye, J., 2024. INSIDE: LLMs' internal states retain the power of hallucination detection. arXiv:2402.03744.
+\bibitem[Clark et~al.(2018)]{clark2018arc} Clark, P., Cowhey, I., Etzioni, O., Khot, T., Sabharwal, A., Schoenick, C., Tafjord, O., 2018. Think you have solved question answering? Try ARC, the AI2 Reasoning Challenge. arXiv:1803.05457.
+\bibitem[Clark et~al.(2019)]{clark2019boolq} Clark, C., Lee, K., Chang, M.-W., Kwiatkowski, T., Collins, M., Toutanova, K., 2019. BoolQ: Exploring the surprising difficulty of natural yes/no questions. NAACL-HLT, 2924--2936.
+\bibitem[DeepSeek-AI(2025)]{deepseek2025r1} DeepSeek-AI, 2025. DeepSeek-R1: Incentivizing reasoning capability in LLMs via reinforcement learning. arXiv:2501.12948.
+\bibitem[Farquhar et~al.(2024)]{farquhar2024semanticentropy} Farquhar, S., Kossen, J., Kuhn, L., Gal, Y., 2024. Detecting hallucinations in large language models using semantic entropy. Nature 630, 625--630.
+\bibitem[Geifman and El-Yaniv(2017)]{geifman2017selective} Geifman, Y., El-Yaniv, R., 2017. Selective classification for deep neural networks. NeurIPS.
+\bibitem[Geifman et~al.(2019)]{geifman2019selectivenet} Geifman, Y., Uziel, G., El-Yaniv, R., 2019. SelectiveNet: A deep neural network with an integrated reject option. ICML, 2151--2159.
+\bibitem[Guo et~al.(2017)]{guo2017calibration} Guo, C., Pleiss, G., Sun, Y., Weinberger, K.Q., 2017. On calibration of modern neural networks. ICML, 1321--1330.
+\bibitem[Hendrycks and Gimpel(2017)]{hendrycks2017baseline} Hendrycks, D., Gimpel, K., 2017. A baseline for detecting misclassified and out-of-distribution examples in neural networks. ICLR.
+\bibitem[Hendrycks et~al.(2021)]{hendrycks2021mmlu} Hendrycks, D., Burns, C., Basart, S., Zou, A., Mazeika, M., Song, D., Steinhardt, J., 2021. Measuring massive multitask language understanding. ICLR.
+\bibitem[Ji et~al.(2024)]{ji2024internal} Ji, Z., Lee, N., Frieske, R., Yu, T., Su, D., Xu, Y., Ishii, E., Bang, Y.J., Madotto, A., Fung, P., 2024. LLM internal states reveal hallucination risk faced with a query. BlackboxNLP Workshop, ACL.
+\bibitem[Jiang et~al.(2023)]{jiang2023mistral} Jiang, A.Q., Sablayrolles, A., Mensch, A., Bamford, C., Chaplot, D.S., de~las Casas, D., Bressand, F., Lengyel, G., Lample, G., Saulnier, L., et~al., 2023. Mistral 7B. arXiv:2310.06825.
+\bibitem[Jolliffe(2002)]{jolliffe2002pca} Jolliffe, I.T., 2002. Principal Component Analysis, second ed. Springer.
+\bibitem[Kadavath et~al.(2022)]{kadavath2022lmknow} Kadavath, S., Conerly, T., Askell, A., Henighan, T., Drain, D., Perez, E., Schiefer, N., et~al., 2022. Language models (mostly) know what they know. arXiv:2207.05221.
+\bibitem[Kirichenko et~al.(2025)]{kirichenko2025abstentionbench} Kirichenko, P., Ibrahim, M., Chaudhuri, K., Bell, S.J., 2025. AbstentionBench: Reasoning LLMs fail on unanswerable questions. arXiv:2506.09038.
+\bibitem[Lakshminarayanan et~al.(2017)]{lakshmi2017ensembles} Lakshminarayanan, B., Pritzel, A., Blundell, C., 2017. Simple and scalable predictive uncertainty estimation using deep ensembles. NeurIPS.
+\bibitem[Manakul et~al.(2023)]{manakul2023selfcheckgpt} Manakul, P., Liusie, A., Gales, M.J.F., 2023. SelfCheckGPT: Zero-resource black-box hallucination detection for generative large language models. EMNLP, 9004--9017.
+\bibitem[Mihaylov et~al.(2018)]{mihaylov2018openbookqa} Mihaylov, T., Clark, P., Khot, T., Sabharwal, A., 2018. Can a suit of armor conduct electricity? A new dataset for open book question answering. EMNLP, 2381--2391.
+\bibitem[OLMo Team(2025)]{olmo22025} OLMo Team, 2025. 2 OLMo 2 Furious. arXiv:2501.00656.
+\bibitem[Orgad et~al.(2024)]{orgad2024llms} Orgad, H., Toker, M., Gekhman, Z., Reichart, R., Szpektor, I., Kotek, H., Belinkov, Y., 2024. LLMs know more than they show: On the intrinsic representation of LLM hallucinations. arXiv:2410.02707.
+\bibitem[Paszke et~al.(2019)]{paszke2019pytorch} Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., et~al., 2019. PyTorch: An imperative style, high-performance deep learning library. NeurIPS, 8024--8035.
+\bibitem[Pedregosa et~al.(2011)]{pedregosa2011sklearn} Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M., et~al., 2011. Scikit-learn: Machine learning in Python. Journal of Machine Learning Research 12, 2825--2830.
+\bibitem[Talmor et~al.(2019)]{talmor2019commonsenseqa} Talmor, A., Herzig, J., Lourie, N., Berant, J., 2019. CommonsenseQA: A question answering challenge targeting commonsense knowledge. NAACL-HLT, 4149--4158.
+\bibitem[Technology Innovation Institute(2025)]{falcon3modelcard} Technology Innovation Institute, 2025. Falcon3-7B-Instruct model card. Hugging Face model repository.
+\bibitem[Wang et~al.(2023)]{wang2023selfconsistency} Wang, X., Wei, J., Schuurmans, D., Le, Q., Chi, E., Narang, S., Chowdhery, A., Zhou, D., 2023. Self-consistency improves chain-of-thought reasoning in language models. ICLR.
+\bibitem[Wang et~al.(2025)]{wang2025ubench} Wang, X., Zhang, Z., Li, Q., Chen, G., Hu, M., Li, Z., Luo, B., Gao, H., Han, Z., Wang, H., 2025. Benchmarking uncertainty in large language models with multiple-choice questions. Findings of ACL.
+\bibitem[Wen et~al.(2025)]{wen2025limits} Wen, B., Yao, J., Feng, S., Xu, C., Tsvetkov, Y., Howe, B., Wang, L.L., 2025. Know your limits: A survey of abstention in large language models. Transactions of the Association for Computational Linguistics 13.
+\bibitem[Wolf et~al.(2020)]{wolf2020transformers} Wolf, T., Debut, L., Sanh, V., Chaumond, J., Delangue, C., Moi, A., Cistac, P., et~al., 2020. Transformers: State-of-the-art natural language processing. EMNLP System Demonstrations, 38--45.
+\bibitem[Yang et~al.(2024)]{yang2024qwen} Yang, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Li, C., Liu, D., Huang, F., Wei, H., et~al., 2024. Qwen2.5 technical report. arXiv:2412.15115.
+\bibitem[Zellers et~al.(2019)]{zellers2019hellaswag} Zellers, R., Holtzman, A., Bisk, Y., Farhadi, A., Choi, Y., 2019. HellaSwag: Can a machine really finish your sentence? ACL, 4791--4800.
+\bibitem[Zhang et~al.(2024)]{zhang2024tinyllama} Zhang, P., Zeng, G., Wang, T., Lu, W., 2024. TinyLlama: An open-source small language model. arXiv:2401.02385.
+\end{thebibliography}
+
+\end{document}

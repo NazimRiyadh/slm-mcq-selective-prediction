@@ -1,0 +1,39 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Measured latency and peak VRAM diagnostics for accessible 7B/9B-class model families.}
+\label{tab:latency}
+\begin{threeparttable}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{llrrrr}
+\toprule
+Model & Signal family & Mean ms & P95 ms & Peak VRAM GB & Relative latency \\
+\midrule
+Qwen2.5-7B & conf./option & 251.3 & 262.6 & 5.33 & 1.00$\times$ \\
+Qwen2.5-7B & conf.+hidden readout & 272.7 & 285.4 & 5.35 & 1.09$\times$ \\
+Qwen2.5-7B & 5x generation & 1657.5 & 1740.9 & 5.33 & 6.60$\times$ \\
+Gemma-2-9B-IT & conf./option & 270.4 & 274.9 & 2.68 & 1.00$\times$ \\
+Gemma-2-9B-IT & conf.+hidden readout & 280.5 & 283.4 & 2.70 & 1.04$\times$ \\
+Gemma-2-9B-IT & 5x generation & 3098.5 & 3149.8 & 2.69 & 11.46$\times$ \\
+Falcon3-7B & conf./option & 259.1 & 267.0 & 6.68 & 1.00$\times$ \\
+Falcon3-7B & conf.+hidden readout & 272.5 & 274.6 & 6.69 & 1.05$\times$ \\
+Falcon3-7B & 5x generation & 1695.6 & 1721.3 & 6.69 & 6.54$\times$ \\
+Llama-3.1-8B-Instruct & conf./option & 266.3 & 272.4 & 2.47 & 1.00$\times$ \\
+Llama-3.1-8B-Instruct & conf.+hidden readout & 257.8 & 265.2 & 2.49 & 0.97$\times$ \\
+Llama-3.1-8B-Instruct & 5x generation & 1917.9 & 2073.0 & 2.47 & 7.20$\times$ \\
+Mistral-7B-v0.3 & conf./option & 238.8 & 248.5 & 5.10 & 1.00$\times$ \\
+Mistral-7B-v0.3 & conf.+hidden readout & 243.2 & 248.8 & 5.11 & 1.02$\times$ \\
+Mistral-7B-v0.3 & 5x generation & 2508.4 & 2555.0 & 5.11 & 10.50$\times$ \\
+OLMo2-7B & conf./option & 274.6 & 287.7 & 6.57 & 1.00$\times$ \\
+OLMo2-7B & conf.+hidden readout & 279.3 & 290.2 & 6.59 & 1.02$\times$ \\
+OLMo2-7B & 5x generation & 2384.5 & 2418.5 & 6.61 & 8.68$\times$ \\
+DeepSeek-R1-Qwen-7B & conf./option & 258.9 & 271.4 & 8.76 & 1.00$\times$ \\
+DeepSeek-R1-Qwen-7B & conf.+hidden readout & 287.4 & 299.9 & 8.78 & 1.11$\times$ \\
+DeepSeek-R1-Qwen-7B & 5x generation & 2301.7 & 2332.2 & 8.77 & 8.89$\times$ \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+
+\begin{tablenotes}[flushleft]\footnotesize\item \parbox{0.95\textwidth}{The benchmarks use synthetic MCQ-style prompts after warm-up. Absolute values are hardware- and implementation-specific; relative latency is the intended cost diagnostic. Gemma and Llama now run successfully after gated-model token access was fixed.}\end{tablenotes}
+\end{threeparttable}
+\end{table}

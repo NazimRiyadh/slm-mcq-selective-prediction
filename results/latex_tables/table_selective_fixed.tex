@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Selective-prediction metrics at fixed coverage in the final scaling audit. Lower risk, AURC, and E-AURC are better; higher failure capture is better.}
+\label{tab:selective-fixed}
+\begin{threeparttable}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{llcccccc}
+\toprule
+Subset & Signal & Risk@80\% & Risk@60\% & Risk@40\% & AURC & E-AURC & Failure capture@20\% abstain \\
+\midrule
+All seven & Confidence/option & 0.264 & 0.208 & 0.157 & 0.191 & 0.099 & 0.423 \\
+All seven & Conf./option + PCA hidden & 0.262 & 0.204 & 0.155 & 0.188 & 0.096 & 0.427 \\
+Competent subset & Confidence/option & 0.190 & 0.129 & 0.074 & 0.115 & 0.070 & 0.456 \\
+Competent subset & Conf./option + PCA hidden & 0.188 & 0.124 & 0.071 & 0.110 & 0.065 & 0.461 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+
+\begin{tablenotes}[flushleft]\footnotesize\item \parbox{0.95\textwidth}{Metrics are averaged over model-dataset conditions, with the best probe within each reported signal family selected by validation AURC in the earlier audit and by family averages in the Gemma/Llama run. The conclusion is unchanged: hidden augmentation slightly improves some operating points but does not change the practical rule.}\end{tablenotes}
+\end{threeparttable}
+\end{table}

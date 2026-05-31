@@ -1,0 +1,45 @@
+model_key,model_name,model_family,dataset,status,n,errors,base_accuracy,error
+qwen25_7b,Qwen/Qwen2.5-7B-Instruct,Qwen,arc_challenge,ok,299.0,0.0,0.8996655518394648,
+qwen25_7b,Qwen/Qwen2.5-7B-Instruct,Qwen,commonsenseqa,ok,1000.0,0.0,0.824,
+qwen25_7b,Qwen/Qwen2.5-7B-Instruct,Qwen,hellaswag,ok,1000.0,0.0,0.836,
+qwen25_7b,Qwen/Qwen2.5-7B-Instruct,Qwen,mmlu_all,ok,1000.0,0.0,0.683,
+mistral7b_v03,mistralai/Mistral-7B-Instruct-v0.3,Mistral,arc_challenge,ok,299.0,0.0,0.7792642140468228,
+mistral7b_v03,mistralai/Mistral-7B-Instruct-v0.3,Mistral,commonsenseqa,ok,1000.0,0.0,0.707,
+mistral7b_v03,mistralai/Mistral-7B-Instruct-v0.3,Mistral,hellaswag,ok,1000.0,0.0,0.693,
+mistral7b_v03,mistralai/Mistral-7B-Instruct-v0.3,Mistral,mmlu_all,ok,1000.0,0.0,0.596,
+gemma2_9b_it,google/gemma-2-9b-it,Gemma,arc_challenge,failed,,,,"You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/google/gemma-2-9b-it.
+401 Client Error. (Request ID: Root=1-6a1ad219-2e5bc39e7600f75651c40c25;958cd5fc-c5c0-4e86-9df0-a0f9cf11f1df)
+
+Cannot access gated repo for url https://huggingface.co/google/gemma-2-9b-it/resolve/main/config.json.
+Access to model google/gemma-2-9b-it is restricted. You must have access to it and be authenticated to access it. Please log in."
+gemma2_9b_it,google/gemma-2-9b-it,Gemma,commonsenseqa,failed,,,,"You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/google/gemma-2-9b-it.
+401 Client Error. (Request ID: Root=1-6a1ad21a-7551506247dcf80a6cd6458d;c00de5ac-8d2b-43b4-8655-e6bbb172fdee)
+
+Cannot access gated repo for url https://huggingface.co/google/gemma-2-9b-it/resolve/main/config.json.
+Access to model google/gemma-2-9b-it is restricted. You must have access to it and be authenticated to access it. Please log in."
+gemma2_9b_it,google/gemma-2-9b-it,Gemma,hellaswag,failed,,,,"You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/google/gemma-2-9b-it.
+401 Client Error. (Request ID: Root=1-6a1ad21c-3e6f846b56346b124030ee8b;04845c0e-0bd6-41ea-8aa9-55c497917ff1)
+
+Cannot access gated repo for url https://huggingface.co/google/gemma-2-9b-it/resolve/main/config.json.
+Access to model google/gemma-2-9b-it is restricted. You must have access to it and be authenticated to access it. Please log in."
+gemma2_9b_it,google/gemma-2-9b-it,Gemma,mmlu_all,failed,,,,"You are trying to access a gated repo.
+Make sure to have access to it at https://huggingface.co/google/gemma-2-9b-it.
+401 Client Error. (Request ID: Root=1-6a1ad21d-284b96637a84e41d2421110c;5dce0fd1-8323-402a-bd8f-59fe5a44a501)
+
+Cannot access gated repo for url https://huggingface.co/google/gemma-2-9b-it/resolve/main/config.json.
+Access to model google/gemma-2-9b-it is restricted. You must have access to it and be authenticated to access it. Please log in."
+olmo2_7b_instruct,allenai/OLMo-2-1124-7B-Instruct,OLMo,arc_challenge,ok,299.0,0.0,0.7357859531772575,
+olmo2_7b_instruct,allenai/OLMo-2-1124-7B-Instruct,OLMo,commonsenseqa,ok,1000.0,0.0,0.731,
+olmo2_7b_instruct,allenai/OLMo-2-1124-7B-Instruct,OLMo,hellaswag,ok,1000.0,0.0,0.628,
+olmo2_7b_instruct,allenai/OLMo-2-1124-7B-Instruct,OLMo,mmlu_all,ok,1000.0,0.0,0.549,
+falcon3_7b_instruct,tiiuae/Falcon3-7B-Instruct,Falcon,arc_challenge,ok,299.0,0.0,0.8361204013377926,
+falcon3_7b_instruct,tiiuae/Falcon3-7B-Instruct,Falcon,commonsenseqa,ok,1000.0,0.0,0.779,
+falcon3_7b_instruct,tiiuae/Falcon3-7B-Instruct,Falcon,hellaswag,ok,1000.0,0.0,0.761,
+falcon3_7b_instruct,tiiuae/Falcon3-7B-Instruct,Falcon,mmlu_all,ok,1000.0,0.0,0.608,
+deepseek_r1_qwen7b,deepseek-ai/DeepSeek-R1-Distill-Qwen-7B,DeepSeek/Qwen-distill,arc_challenge,ok,299.0,0.0,0.3244147157190635,
+deepseek_r1_qwen7b,deepseek-ai/DeepSeek-R1-Distill-Qwen-7B,DeepSeek/Qwen-distill,commonsenseqa,ok,1000.0,0.0,0.223,
+deepseek_r1_qwen7b,deepseek-ai/DeepSeek-R1-Distill-Qwen-7B,DeepSeek/Qwen-distill,hellaswag,ok,1000.0,0.0,0.258,
+deepseek_r1_qwen7b,deepseek-ai/DeepSeek-R1-Distill-Qwen-7B,DeepSeek/Qwen-distill,mmlu_all,ok,1000.0,0.0,0.291,

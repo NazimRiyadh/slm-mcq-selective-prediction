@@ -1,0 +1,4 @@
+model,model_id,signal_family,mean_latency_ms,p95_latency_ms,peak_vram_gb,relative_latency
+llama31_8b_instruct,meta-llama/Llama-3.1-8B-Instruct,conf_option,266.34265881250485,272.3855731502226,2.470703125,1.0
+llama31_8b_instruct,meta-llama/Llama-3.1-8B-Instruct,conf_plus_hidden_readout,257.815660850099,265.19575145025556,2.494140625,0.9679848583008682
+llama31_8b_instruct,meta-llama/Llama-3.1-8B-Instruct,five_sample_generation,1917.916851974951,2072.9762051500984,2.47265625,7.200937546114578

@@ -1,0 +1,6 @@
+question,answered,evidence
+Are confidence/option scores strong for MCQ selective prediction?,Yes,7B--9B model-family scaling; fixed-coverage risk; AURC/E-AURC
+Do hidden-state summaries or PCA probes consistently improve over cheap signals?,Mostly small/inconsistent gains,"Hidden summaries, PCA embeddings, learned probes, PCA sensitivity, layer localization"
+Do hidden states contain no reliability signal?,"No, not claimed",PCA hidden-only and layer analyses show secondary signal
+"Does this generalize to open-ended hallucination, RAG, or long-form generation?",No,Outside scope; automatically verifiable MCQ only
+Is this a scaling law over all SLMs?,No,Focused open-weight 7B--9B scaling audit

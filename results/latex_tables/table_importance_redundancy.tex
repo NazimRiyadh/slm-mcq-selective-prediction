@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Feature-group importance and redundancy diagnostics in the final scaling audit.}
+\label{tab:importance-redundancy}
+\begin{threeparttable}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{llcc}
+\toprule
+Diagnostic & Quantity & All seven & Competent subset \\
+\midrule
+Group permutation & Confidence/option drop & 0.148 & 0.163 \\
+Group permutation & PCA-hidden drop & 0.104 & 0.120 \\
+Redundancy diagnostic & Confidence/option AUROC & 0.770 & 0.799 \\
+Redundancy diagnostic & PCA-hidden-only AUROC & 0.726 & 0.764 \\
+Redundancy diagnostic & Combined AUROC & 0.755 & 0.786 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+
+\begin{tablenotes}[flushleft]\footnotesize\item \parbox{0.95\textwidth}{The confidence/option group causes the larger AUROC drop under permutation. In the fixed logistic redundancy diagnostic, adding PCA-hidden features can underperform because hidden features add variance without enough independent information.}\end{tablenotes}
+\end{threeparttable}
+\end{table}

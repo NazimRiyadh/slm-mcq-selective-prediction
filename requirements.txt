@@ -1,0 +1,15 @@
+torch
+transformers
+accelerate
+bitsandbytes
+datasets
+huggingface_hub
+numpy
+pandas
+scikit-learn
+scipy
+matplotlib
+tqdm
+pyyaml
+pyarrow
+nbformat

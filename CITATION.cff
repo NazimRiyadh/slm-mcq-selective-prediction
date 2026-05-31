@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: "Cost-Aware Selective Prediction for Multiple-Choice Small Language Models"
+message: "If you use this code, configurations, or processed results, please cite the archived repository and the associated paper."
+type: software
+authors:
+  - family-names: "Alam"
+    given-names: "Nazim-E"
+year: 2026
+repository-code: "https://github.com/YOUR_USERNAME/slm-mcq-selective-prediction"
+license: MIT
+# After creating the Zenodo archive, add the DOI below:
+# doi: "10.5281/zenodo.XXXXXXX"

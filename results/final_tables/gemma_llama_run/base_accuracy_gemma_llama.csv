@@ -1,0 +1,9 @@
+model,model_id,dataset,n,base_accuracy,failures
+gemma2_9b_it,google/gemma-2-9b-it,arc_challenge,299,0.919732441471572,24
+gemma2_9b_it,google/gemma-2-9b-it,commonsenseqa,1000,0.79,210
+gemma2_9b_it,google/gemma-2-9b-it,hellaswag,1000,0.779,221
+gemma2_9b_it,google/gemma-2-9b-it,mmlu,1000,0.727,273
+llama31_8b_instruct,meta-llama/Llama-3.1-8B-Instruct,arc_challenge,299,0.7993311036789298,60
+llama31_8b_instruct,meta-llama/Llama-3.1-8B-Instruct,commonsenseqa,1000,0.741,259
+llama31_8b_instruct,meta-llama/Llama-3.1-8B-Instruct,hellaswag,1000,0.672,328
+llama31_8b_instruct,meta-llama/Llama-3.1-8B-Instruct,mmlu,1000,0.613,387

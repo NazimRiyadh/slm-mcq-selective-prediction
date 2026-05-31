@@ -1,0 +1,22 @@
+name: slm-mcq-selective-prediction
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - pyyaml
+  - tqdm
+  - pip:
+      - torch
+      - transformers
+      - accelerate
+      - bitsandbytes
+      - datasets
+      - huggingface_hub
+      - pyarrow
+      - nbformat

@@ -1,0 +1,25 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Base MCQ accuracy in the final 7B/9B-class scaling audit. ARC-Challenge uses 299 validation examples; the other datasets use 1000 examples per model where available.}
+\label{tab:base-accuracy}
+\begin{threeparttable}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{lccccc}
+\toprule
+Model family & ARC-C & CSQA & HellaSwag & MMLU & Mean \\
+\midrule
+Qwen2.5-7B & 0.900 & 0.824 & 0.836 & 0.683 & 0.811 \\
+Gemma-2-9B-IT & 0.920 & 0.790 & 0.779 & 0.727 & 0.804 \\
+Falcon3-7B & 0.836 & 0.779 & 0.761 & 0.608 & 0.746 \\
+Llama-3.1-8B-Instruct & 0.799 & 0.741 & 0.672 & 0.613 & 0.706 \\
+Mistral-7B-v0.3 & 0.779 & 0.707 & 0.693 & 0.596 & 0.694 \\
+OLMo2-7B & 0.736 & 0.731 & 0.628 & 0.549 & 0.661 \\
+DeepSeek-R1-Qwen-7B & 0.324 & 0.223 & 0.258 & 0.291 & 0.274 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+
+\begin{tablenotes}[flushleft]\footnotesize\item \parbox{0.95\textwidth}{DeepSeek-R1-Distill-Qwen-7B is retained as a forced-choice scoring stress test because its direct option-scoring accuracy is far below the other instruction models. Competent-subset averages therefore exclude only this stress-test model.}\end{tablenotes}
+\end{threeparttable}
+\end{table}
