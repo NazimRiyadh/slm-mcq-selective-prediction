@@ -1,0 +1,9 @@
+model,dataset,comparison,mean_delta_auroc,n_seed_pairs
+deepseek_r1_qwen7b,arc_challenge,cheap_plus_hidden_pca - confidence_option,-0.10492618741976889,5
+deepseek_r1_qwen7b,arc_challenge,hidden_pca - confidence_option,-0.23989216944801023,5
+deepseek_r1_qwen7b,commonsenseqa,cheap_plus_hidden_pca - confidence_option,-0.029578314158959264,5
+deepseek_r1_qwen7b,commonsenseqa,hidden_pca - confidence_option,-0.07296465899691702,5
+deepseek_r1_qwen7b,hellaswag,cheap_plus_hidden_pca - confidence_option,0.05366894347352298,5
+deepseek_r1_qwen7b,hellaswag,hidden_pca - confidence_option,0.00382159240232669,5
+deepseek_r1_qwen7b,mmlu,cheap_plus_hidden_pca - confidence_option,-0.024016512870325378,5
+deepseek_r1_qwen7b,mmlu,hidden_pca - confidence_option,-0.07110247693054886,5

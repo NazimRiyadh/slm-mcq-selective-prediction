@@ -1,0 +1,3 @@
+family,paired_conditions_seeded,mean_risk_at_80,expected_errors_among_800_answered_per_1000_queries,additional_errors_avoided_vs_conf_option
+confidence_option,170,0.1858974726254138,148.71797810033104,0.0
+cheap_plus_hidden_pca,170,0.18532308377896614,148.25846702317293,0.45951107715813677

@@ -1,0 +1,16 @@
+\begin{table}[!htbp]
+\centering
+\small
+\caption{Operational interpretation of hidden-state augmentation at fixed 80\% coverage. Values are reported per 1000 finite-choice queries using the competent-model subset; lower retained error is better.}
+\label{tab:operational-interpretation}
+\begin{adjustbox}{width=0.96\textwidth}
+\begin{tabular}{lccc}
+\toprule
+Selector & Risk@80\% & Expected errors among 800 answered & Extra errors avoided \\
+\midrule
+Confidence/option & 0.190 & 152.0 & -- \\
+Confidence/option + PCA hidden & 0.188 & 150.4 & 1.6 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

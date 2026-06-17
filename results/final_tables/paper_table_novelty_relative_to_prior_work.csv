@@ -1,6 +1,0 @@
-research_direction,main_focus,cost_measured,hidden_probes,scaling_check,selective_metrics,explains_redundancy
-Confidence / MSP baselines,Misclassification or OOD detection,Usually no,No,Limited,Sometimes,No
-LLM uncertainty benchmarks,Broad uncertainty comparison,Limited,Sometimes,Often,Sometimes,Rarely
-Hidden-state hallucination probes,Internal truth/reliability signals,Rarely,Yes,Sometimes,Limited,Partly
-Sampling / semantic uncertainty,Generation uncertainty,Sometimes,No,Sometimes,Limited,No
-This work,Cost-aware signal selection for MCQ selective prediction,Yes,Yes,Yes,Yes,Yes

@@ -1,0 +1,42 @@
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Per-condition incremental value of PCA-hidden augmentation in the primary competent 7B/9B-class audit. Values are AUROC. Positive deltas indicate that confidence/option plus PCA-hidden features outperform confidence/option features.}
+\label{tab:per-condition-deltas}
+\begin{threeparttable}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{llccc}
+\toprule
+Model & Dataset & Conf./option & Conf./option + PCA & $\Delta$ \\
+\midrule
+Qwen2.5-7B & ARC-C & 0.830 & 0.821 & -0.010 \\
+Qwen2.5-7B & CSQA & 0.832 & 0.831 & -0.002 \\
+Qwen2.5-7B & HellaSwag & 0.871 & 0.878 & +0.007 \\
+Qwen2.5-7B & MMLU & 0.854 & 0.855 & +0.001 \\
+Gemma-2-9B-IT & ARC-C & 0.905 & 0.888 & -0.017 \\
+Gemma-2-9B-IT & CSQA & 0.813 & 0.813 & +0.000 \\
+Gemma-2-9B-IT & HellaSwag & 0.784 & 0.784 & +0.000 \\
+Gemma-2-9B-IT & MMLU & 0.866 & 0.887 & +0.022 \\
+Falcon3-7B & ARC-C & 0.825 & 0.833 & +0.008 \\
+Falcon3-7B & CSQA & 0.824 & 0.828 & +0.004 \\
+Falcon3-7B & HellaSwag & 0.810 & 0.817 & +0.006 \\
+Falcon3-7B & MMLU & 0.803 & 0.819 & +0.017 \\
+Llama-3.1-8B-Instruct & ARC-C & 0.866 & 0.860 & -0.006 \\
+Llama-3.1-8B-Instruct & CSQA & 0.791 & 0.799 & +0.009 \\
+Llama-3.1-8B-Instruct & HellaSwag & 0.769 & 0.774 & +0.005 \\
+Llama-3.1-8B-Instruct & MMLU & 0.819 & 0.824 & +0.005 \\
+Mistral-7B-v0.3 & ARC-C & 0.685 & 0.699 & +0.013 \\
+Mistral-7B-v0.3 & CSQA & 0.746 & 0.745 & -0.001 \\
+Mistral-7B-v0.3 & HellaSwag & 0.723 & 0.766 & +0.043 \\
+Mistral-7B-v0.3 & MMLU & 0.750 & 0.767 & +0.017 \\
+OLMo2-7B & ARC-C & 0.788 & 0.809 & +0.022 \\
+OLMo2-7B & CSQA & 0.774 & 0.780 & +0.005 \\
+OLMo2-7B & HellaSwag & 0.708 & 0.743 & +0.035 \\
+OLMo2-7B & MMLU & 0.752 & 0.751 & -0.001 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\begin{tablenotes}[flushleft]\footnotesize\item The table shows that hidden augmentation is not uniformly beneficial: the average competent-subset gain is positive but small, with gains and losses varying by model--dataset condition.\end{tablenotes}
+\end{threeparttable}
+\end{table}

@@ -1,5 +1,0 @@
-comparison,n_cases,mean_gain,std_gain,positive_cases,negative_or_zero_cases
-gain_hidden_summary_only_over_cheap,20,-0.06166159315516073,0.05119272506397445,3,17
-gain_pca_hidden_embeddings_over_cheap,20,-0.03400059104093358,0.0469503935934307,4,16
-gain_cheap_plus_hidden_summary_over_cheap,20,0.0031207308857476414,0.02307209949721586,11,9
-gain_cheap_plus_pca_hidden_over_cheap,20,0.00536363217156699,0.019981257938290684,13,7

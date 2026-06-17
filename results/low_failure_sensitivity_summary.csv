@@ -1,0 +1,25 @@
+threshold_mean_failures,comparison,metric,n_condition_seed_pairs,n_conditions,mean_delta,median_delta,positive_cases,negative_cases
+10,hidden_pca - confidence_option,test_auroc_correct,170,34,-0.06455071128409032,-0.027192555991575662,44,125
+10,hidden_pca - confidence_option,test_auprc_failure,170,34,-0.07400930552680532,-0.04426316647537484,49,121
+10,hidden_pca - confidence_option,test_risk_at_80,170,34,0.016461675579322644,0.010714285714285683,104,42
+10,hidden_pca - confidence_option,test_aurc,170,34,0.025908977831517913,0.008986796618417848,116,54
+10,cheap_plus_hidden_pca - confidence_option,test_auroc_correct,170,34,-0.0085616725165452,-0.001335900988566785,80,90
+10,cheap_plus_hidden_pca - confidence_option,test_auprc_failure,170,34,2.3285862790274858e-05,-0.0016562716998909655,82,88
+10,cheap_plus_hidden_pca - confidence_option,test_risk_at_80,170,34,-0.000574388846447667,0.0,66,70
+10,cheap_plus_hidden_pca - confidence_option,test_aurc,170,34,0.0022599007149103475,-0.0005689636566692038,81,89
+25,hidden_pca - confidence_option,test_auroc_correct,165,33,-0.05709632512465504,-0.02654677799186478,44,120
+25,hidden_pca - confidence_option,test_auprc_failure,165,33,-0.0693942688383014,-0.036792869478174894,49,116
+25,hidden_pca - confidence_option,test_risk_at_80,165,33,0.015824150596877872,0.00892857142857141,100,41
+25,hidden_pca - confidence_option,test_aurc,165,33,0.024999781216093586,0.008295770133787697,111,54
+25,cheap_plus_hidden_pca - confidence_option,test_auroc_correct,165,33,-0.0034216681024460184,-0.0013222743118165292,78,87
+25,cheap_plus_hidden_pca - confidence_option,test_auprc_failure,165,33,0.0018617136568839896,-0.0020093321386482343,79,86
+25,cheap_plus_hidden_pca - confidence_option,test_risk_at_80,165,33,-0.0010968450741177984,0.0,63,69
+25,cheap_plus_hidden_pca - confidence_option,test_aurc,165,33,0.0013328196430409272,-0.0005756160368100005,78,87
+50,hidden_pca - confidence_option,test_auroc_correct,150,30,-0.05532325490170539,-0.023720693703432383,43,106
+50,hidden_pca - confidence_option,test_auprc_failure,150,30,-0.05770264311695341,-0.02647418181396949,48,102
+50,hidden_pca - confidence_option,test_risk_at_80,150,30,0.0157994227994228,0.00892857142857141,93,38
+50,hidden_pca - confidence_option,test_aurc,150,30,0.02596540369336772,0.007918335513852591,98,52
+50,cheap_plus_hidden_pca - confidence_option,test_auroc_correct,150,30,-0.00032344547913941776,-0.0009437909111192355,73,77
+50,cheap_plus_hidden_pca - confidence_option,test_auprc_failure,150,30,0.004774625674167806,-0.0016562716998909655,72,78
+50,cheap_plus_hidden_pca - confidence_option,test_risk_at_80,150,30,-0.001206529581529579,0.0,59,64
+50,cheap_plus_hidden_pca - confidence_option,test_aurc,150,30,0.0008444944779751751,-0.000993307180647697,67,83

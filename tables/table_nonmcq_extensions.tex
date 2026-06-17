@@ -1,0 +1,45 @@
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Locked auxiliary finite-choice classification results. AG News, TREC, and DBPedia are run with Qwen2.5-7B, Llama-3.1-8B, and Mistral-7B-v0.3; Banking77 is retained as a small 77-way Qwen2.5-7B routing stress check. These 10 conditions broaden the finite-choice evidence but are reported as auxiliary to the main MCQ result. Lower Risk@80\% and AURC are better.}
+\label{tab:nonmcq-extensions}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{lllrrrrrrr}
+\toprule
+Dataset & Model & Selector & $n$ & Labels & Acc. & AUROC & AUPRC-fail & Risk@80\% & AURC \\
+\midrule
+AG News & Qwen2.5-7B & Confidence/option & 1000 & 4 & 0.865 & 0.886 & 0.674 & 0.045 & 0.032 \\
+AG News & Qwen2.5-7B & PCA hidden only & 1000 & 4 & 0.865 & 0.881 & 0.637 & 0.041 & 0.036 \\
+AG News & Qwen2.5-7B & Confidence/option + PCA hidden & 1000 & 4 & 0.865 & 0.891 & 0.671 & 0.039 & 0.033 \\
+AG News & Llama-3.1-8B & Confidence/option & 1000 & 4 & 0.879 & 0.830 & 0.460 & 0.051 & 0.036 \\
+AG News & Llama-3.1-8B & PCA hidden only & 1000 & 4 & 0.879 & 0.788 & 0.349 & 0.071 & 0.041 \\
+AG News & Llama-3.1-8B & Confidence/option + PCA hidden & 1000 & 4 & 0.879 & 0.811 & 0.428 & 0.061 & 0.037 \\
+AG News & Mistral-7B-v0.3 & Confidence/option & 1000 & 4 & 0.846 & 0.756 & 0.406 & 0.101 & 0.069 \\
+AG News & Mistral-7B-v0.3 & PCA hidden only & 1000 & 4 & 0.846 & 0.742 & 0.396 & 0.107 & 0.071 \\
+AG News & Mistral-7B-v0.3 & Confidence/option + PCA hidden & 1000 & 4 & 0.846 & 0.758 & 0.397 & 0.096 & 0.067 \\
+TREC & Qwen2.5-7B & Confidence/option & 480 & 6 & 0.577 & 0.829 & 0.780 & 0.317 & 0.190 \\
+TREC & Qwen2.5-7B & PCA hidden only & 480 & 6 & 0.577 & 0.820 & 0.788 & 0.327 & 0.204 \\
+TREC & Qwen2.5-7B & Confidence/option + PCA hidden & 480 & 6 & 0.577 & 0.831 & 0.784 & 0.325 & 0.193 \\
+TREC & Llama-3.1-8B & Confidence/option & 480 & 6 & 0.592 & 0.807 & 0.686 & 0.312 & 0.185 \\
+TREC & Llama-3.1-8B & PCA hidden only & 480 & 6 & 0.592 & 0.766 & 0.699 & 0.319 & 0.215 \\
+TREC & Llama-3.1-8B & Confidence/option + PCA hidden & 480 & 6 & 0.592 & 0.785 & 0.683 & 0.330 & 0.197 \\
+TREC & Mistral-7B-v0.3 & Confidence/option & 480 & 6 & 0.479 & 0.839 & 0.834 & 0.431 & 0.266 \\
+TREC & Mistral-7B-v0.3 & PCA hidden only & 480 & 6 & 0.479 & 0.893 & 0.895 & 0.421 & 0.238 \\
+TREC & Mistral-7B-v0.3 & Confidence/option + PCA hidden & 480 & 6 & 0.479 & 0.906 & 0.914 & 0.413 & 0.238 \\
+DBPedia & Qwen2.5-7B & Confidence/option & 1400 & 14 & 0.972 & 0.907 & 0.502 & 0.004 & 0.011 \\
+DBPedia & Qwen2.5-7B & PCA hidden only & 1400 & 14 & 0.972 & 0.899 & 0.352 & 0.003 & 0.011 \\
+DBPedia & Qwen2.5-7B & Confidence/option + PCA hidden & 1400 & 14 & 0.972 & 0.889 & 0.521 & 0.004 & 0.012 \\
+DBPedia & Llama-3.1-8B & Confidence/option & 1400 & 14 & 0.759 & 0.976 & 0.925 & 0.079 & 0.038 \\
+DBPedia & Llama-3.1-8B & PCA hidden only & 1400 & 14 & 0.759 & 0.969 & 0.906 & 0.079 & 0.040 \\
+DBPedia & Llama-3.1-8B & Confidence/option + PCA hidden & 1400 & 14 & 0.759 & 0.983 & 0.954 & 0.067 & 0.036 \\
+DBPedia & Mistral-7B-v0.3 & Confidence/option & 1400 & 14 & 0.864 & 0.885 & 0.611 & 0.046 & 0.035 \\
+DBPedia & Mistral-7B-v0.3 & PCA hidden only & 1400 & 14 & 0.864 & 0.926 & 0.752 & 0.034 & 0.023 \\
+DBPedia & Mistral-7B-v0.3 & Confidence/option + PCA hidden & 1400 & 14 & 0.864 & 0.940 & 0.766 & 0.024 & 0.020 \\
+Banking77 & Qwen2.5-7B & Confidence/option & 200 & 77 & 0.550 & 0.793 & 0.761 & 0.375 & 0.225 \\
+Banking77 & Qwen2.5-7B & PCA hidden only & 200 & 77 & 0.550 & 0.832 & 0.800 & 0.375 & 0.208 \\
+Banking77 & Qwen2.5-7B & Confidence/option + PCA hidden & 200 & 77 & 0.550 & 0.830 & 0.819 & 0.344 & 0.223 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

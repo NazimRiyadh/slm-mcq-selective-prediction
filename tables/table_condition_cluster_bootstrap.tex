@@ -1,0 +1,31 @@
+
+\begin{table}[t]
+\centering
+\small
+\caption{Condition-cluster bootstrap deltas for confidence/option plus PCA-hidden selection relative to the confidence/option selector. The bootstrap resamples model--dataset conditions and then resamples seeds within selected conditions. Positive deltas are beneficial for AUROC and AUPRC-failure but harmful for Risk@80\% and AURC.}
+\label{tab:condition-cluster-bootstrap}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{llrrrr}
+\toprule
+Analysis & Metric & Mean $\Delta$ & 95\% cluster CI & Conditions & Sign pattern \\
+\midrule
+Main MCQ (24 cond.) & AUROC & -0.0169 & [-0.0386, -0.0007] & 24 & 49/71 \\
+Main MCQ (24 cond.) & AUPRC-fail & -0.0124 & [-0.0277, +0.0005] & 24 & 47/73 \\
+Main MCQ (24 cond.) & Risk@80\% & +0.0017 & [-0.0039, +0.0071] & 24 & 51/45 \\
+Main MCQ (24 cond.) & AURC & +0.0046 & [-0.0021, +0.0125] & 24 & 62/58 \\
+Non-MCQ finite-choice (9 cond.) & AUROC & +0.0086 & [-0.0112, +0.0303] & 9 & 27/18 \\
+Non-MCQ finite-choice (9 cond.) & AUPRC-fail & +0.0266 & [-0.0082, +0.0679] & 9 & 30/15 \\
+Non-MCQ finite-choice (9 cond.) & Risk@80\% & -0.0031 & [-0.0117, +0.0062] & 9 & 14/23 \\
+Non-MCQ finite-choice (9 cond.) & AURC & -0.0034 & [-0.0117, +0.0034] & 9 & 17/28 \\
+All auxiliary extensions (10 cond.) & AUROC & +0.0114 & [-0.0075, +0.0311] & 10 & 31/19 \\
+All auxiliary extensions (10 cond.) & AUPRC-fail & +0.0298 & [-0.0021, +0.0679] & 10 & 35/15 \\
+All auxiliary extensions (10 cond.) & Risk@80\% & -0.0060 & [-0.0170, +0.0036] & 10 & 15/25 \\
+All auxiliary extensions (10 cond.) & AURC & -0.0033 & [-0.0113, +0.0035] & 10 & 19/31 \\
+All primary conditions (34 cond.) & AUROC & -0.0086 & [-0.0256, +0.0051] & 34 & 80/90 \\
+All primary conditions (34 cond.) & AUPRC-fail & +0.0000 & [-0.0153, +0.0154] & 34 & 82/88 \\
+All primary conditions (34 cond.) & Risk@80\% & -0.0006 & [-0.0058, +0.0045] & 34 & 66/70 \\
+All primary conditions (34 cond.) & AURC & +0.0023 & [-0.0035, +0.0082] & 34 & 81/89 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

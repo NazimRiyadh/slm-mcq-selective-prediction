@@ -1,4 +1,0 @@
-model,model_id,signal_family,mean_latency_ms,p95_latency_ms,peak_vram_gb,relative_latency
-gemma2_9b_it,google/gemma-2-9b-it,conf_option,270.4223987874798,274.88027380004496,2.67578125,1.0
-gemma2_9b_it,google/gemma-2-9b-it,conf_plus_hidden_readout,280.5050583750358,283.420749100128,2.697265625,1.0372848537427544
-gemma2_9b_it,google/gemma-2-9b-it,five_sample_generation,3098.4832891625106,3149.783937049756,2.685546875,11.45793877672668

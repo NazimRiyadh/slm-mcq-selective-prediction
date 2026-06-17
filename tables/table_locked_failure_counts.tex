@@ -1,0 +1,39 @@
+
+\begin{table}[t]
+\centering
+\scriptsize
+\caption{Per-condition sample and failure counts for the primary locked 7B/9B-class analysis. The table is included because failure prediction can be unstable when the failure class is small.}
+\label{tab:locked-failure-counts}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{llrrrr}
+\toprule
+Model & Dataset & $n$ & Accuracy & Failures & Test failures per seed \\
+\midrule
+Falcon3-7B & ARC-C & 299 & 0.836 & 49 & 10 \\
+Falcon3-7B & CSQA & 1000 & 0.779 & 221 & 44 \\
+Falcon3-7B & HellaSwag & 1000 & 0.761 & 239 & 48 \\
+Falcon3-7B & MMLU & 1000 & 0.608 & 392 & 79 \\
+Gemma-2-9B & ARC-C & 299 & 0.920 & 24 & 5 \\
+Gemma-2-9B & CSQA & 1000 & 0.790 & 210 & 42 \\
+Gemma-2-9B & HellaSwag & 1000 & 0.779 & 221 & 44 \\
+Gemma-2-9B & MMLU & 1000 & 0.727 & 273 & 54 \\
+Llama-3.1-8B & ARC-C & 299 & 0.799 & 60 & 12 \\
+Llama-3.1-8B & CSQA & 1000 & 0.741 & 259 & 52 \\
+Llama-3.1-8B & HellaSwag & 1000 & 0.672 & 328 & 65--66 \\
+Llama-3.1-8B & MMLU & 1000 & 0.613 & 387 & 78 \\
+Mistral-7B & ARC-C & 299 & 0.779 & 66 & 13 \\
+Mistral-7B & CSQA & 1000 & 0.707 & 293 & 58--59 \\
+Mistral-7B & HellaSwag & 1000 & 0.693 & 307 & 61--62 \\
+Mistral-7B & MMLU & 1000 & 0.596 & 404 & 81 \\
+OLMo2-7B & ARC-C & 299 & 0.736 & 79 & 16 \\
+OLMo2-7B & CSQA & 1000 & 0.731 & 269 & 54 \\
+OLMo2-7B & HellaSwag & 1000 & 0.628 & 372 & 74 \\
+OLMo2-7B & MMLU & 1000 & 0.549 & 451 & 90 \\
+Qwen2.5-7B & ARC-C & 299 & 0.900 & 30 & 6 \\
+Qwen2.5-7B & CSQA & 1000 & 0.824 & 176 & 35 \\
+Qwen2.5-7B & HellaSwag & 1000 & 0.836 & 164 & 33 \\
+Qwen2.5-7B & MMLU & 1000 & 0.683 & 317 & 63--64 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

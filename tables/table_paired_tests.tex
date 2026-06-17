@@ -1,0 +1,18 @@
+
+\begin{table}[t]
+\centering
+\caption{Paired incremental-utility tests for hidden augmentation. Positive $\Delta$AUROC means improvement over the confidence/option baseline; for AURC, negative values are better. Bootstrap intervals resample model--dataset cases with replacement.}
+\label{tab:paired-tests}
+\footnotesize
+\begin{tabularx}{\linewidth}{p{0.23\linewidth}p{0.18\linewidth}r r p{0.16\linewidth}r p{0.15\linewidth}}
+\toprule
+Comparison & Subset/metric & Cases & Mean $\Delta$ & 95\% CI & Wilcoxon $p$ & Improved cases\\
+\midrule
+Summary aug. $-$ cheap & All expanded & 28 & +0.001 & [-0.007, +0.008] & 0.920 & 13/28\\
+Summary aug. $-$ cheap & Competent & 24 & +0.001 & [-0.005, +0.008] & 0.663 & 12/24\\
+PCA aug. $-$ cheap & All expanded & 28 & +0.004 & [-0.002, +0.011] & 0.131 & 19/28\\
+PCA aug. $-$ cheap & Competent & 24 & +0.008 & [+0.003, +0.013] & 0.011 & 18/24\\
+PCA aug. $-$ cheap & AURC diagnostic & 28 & -0.003 & [-0.008, +0.001] & 0.070 & 17/28 lower\\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Reproducibility checklist for the manuscript package.}
+\label{tab:reproducibility}
+\begin{threeparttable}
+
+\begin{tabular}{p{0.36\textwidth}p{0.55\textwidth}}
+\toprule
+Item & Status in this manuscript package \\
+\midrule
+Raw result summaries & Included as CSV tables in the supplementary results folder. \\
+Figure scripts / notebooks & Included in the public reproducibility repository. \\
+Random seeds & The expanded 7B/9B-class diagnostics use five seeds: 42, 7, 123, 777, and 2025. \\
+Environment metadata & Included as requirements/environment metadata in the reproducibility folder. \\
+Repository & Public repository available at \url{https://github.com/NazimRiyadh/slm-mcq-selective-prediction}. \\
+Model access & Model weights are not redistributed; gated checkpoints require user-side access approval. \\
+\bottomrule
+\end{tabular}
+
+\begin{tablenotes}[flushleft]\footnotesize\item \parbox{0.95\textwidth}{The repository contains the notebook, configuration metadata, processed result tables, figures, and environment information needed to reproduce the main analyses.}\end{tablenotes}
+\end{threeparttable}
+\end{table}

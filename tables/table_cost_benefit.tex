@@ -1,0 +1,18 @@
+
+\begin{table}[t]
+\centering
+\small
+\caption{Cost-benefit interpretation of the competent-subset fixed-coverage result. Values are normalized per 1000 finite-choice queries at 80\% coverage.}
+\label{tab:cost-benefit}
+\begin{threeparttable}
+\begin{tabular}{lccc}
+\toprule
+Selector & Risk@80\% & Expected retained errors & Incremental avoided errors \\
+\midrule
+Confidence/option & 0.190 & 152.0 / 1000 queries & -- \\
+Confidence/option + PCA hidden & 0.188 & 150.4 / 1000 queries & 1.6 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]\footnotesize\item At this operating point, hidden augmentation is worthwhile only if avoiding roughly 1.6 additional retained errors per 1000 queries is worth more than the added white-box access, activation handling, storage, validation, and maintenance burden.\end{tablenotes}
+\end{threeparttable}
+\end{table}

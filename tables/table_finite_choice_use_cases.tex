@@ -1,0 +1,20 @@
+
+\begin{table}[!htbp]
+\centering
+\small
+\caption{Real-world finite-choice deployments represented by answerable MCQ selective prediction. The claim is not that all LLM reliability is MCQ-like; the claim is that many practical SLM systems choose among explicit candidates and can abstain or escalate uncertain decisions.}
+\label{tab:finite-choice-use-cases}
+\begin{tabularx}{\textwidth}{p{0.25\textwidth}X p{0.30\textwidth}}
+\toprule
+Deployment setting & Explicit candidate set & Abstention or escalation meaning \\
+\midrule
+Educational tutoring and assessment & Answer options, misconception labels, feedback templates & Ask teacher, show explanation, or defer feedback. \\
+Customer-support routing & Issue categories, departments, response templates & Route to human agent or request clarification. \\
+Content moderation and policy screening & Policy labels, severity levels, violation categories & Send uncertain or high-impact cases to human review. \\
+Clinical or operational triage support & Non-final risk or urgency categories & Escalate to qualified professional review; not autonomous diagnosis. \\
+RAG candidate-answer selection & Retrieved candidate answers, citations, or evidence snippets & Retrieve more evidence, call a larger model, or abstain. \\
+Tool/action selection in agents & Allowed tools, API calls, or next-step actions & Ask the user or switch to a safer planner. \\
+Cybersecurity or compliance triage & Alert types, risk classes, clause categories & Escalate to analyst or compliance-officer review. \\
+\bottomrule
+\end{tabularx}
+\end{table}

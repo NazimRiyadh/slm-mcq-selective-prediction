@@ -1,0 +1,387 @@
+
+%% Elsevier elsarticle manuscript.
+\documentclass[preprint,12pt,authoryear]{elsarticle}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+\usepackage{threeparttable}
+\usepackage{placeins}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}}
+
+\journal{Machine Learning with Applications}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{When Do Hidden-State Probes Add Deployable Value? A Cost-Aware Locked Validation Study of Finite-Choice Small Language Models}
+
+\author[aff1]{Nazim-E-Alam\corref{cor1}}
+% \ead{add-corresponding-author-email-before-submission}
+\cortext[cor1]{Corresponding author.}
+\affiliation[aff1]{organization={Independent Researcher}, country={Bangladesh}}
+
+
+
+\begin{abstract}
+Selective prediction allows a small language model (SLM) to abstain when its answer is likely to be wrong, but reliability signals differ greatly in deployment cost. Confidence and option-score features are available from a single forced-choice scoring pass, whereas hidden-state probes require white-box access, activation extraction, feature storage, probe fitting, and target-distribution validation. This paper presents a locked, cost-aware incremental-utility audit of when hidden-state probes add deployable value beyond cheap confidence/option evidence in finite-choice SLM systems. The contribution is not a new uncertainty estimator; it is a reproducible protocol for deciding whether a costly internal signal improves target-domain selective risk enough to justify deployment. The primary evidence is a locked train/validation/test analysis on answerable MCQ benchmarks, covering six protocol-compatible 7B/9B-class model families across four datasets; DeepSeek-R1-Distill-Qwen-7B is reported separately as a forced-choice protocol stress test. On the 24-condition MCQ suite, confidence/option selectors achieve 0.799 AUROC, 0.570 failure-detection AUPRC, 0.190 Risk@80\% coverage, and 0.115 AURC, outperforming confidence/option plus PCA-hidden augmentation under the same locked protocol. To address MCQ-bound generality, we add 10 auxiliary finite-choice classification conditions: AG News, TREC, and DBPedia with Qwen2.5-7B, Llama-3.1-8B, and Mistral-7B-v0.3, plus a small Banking77 routing check. These auxiliary conditions show heterogeneous target-domain behavior rather than broad generalization: hidden augmentation improves the non-MCQ average modestly (0.866 versus 0.857 AUROC; 0.680 versus 0.653 AUPRC-failure; 0.151 versus 0.154 Risk@80\%), with larger gains in some Mistral DBPedia/TREC and Banking77 operating points, but the condition-cluster intervals remain compatible with small or no average gain. The resulting recommendation is a conservative cost-aware rule: begin with confidence/option-based abstention, report selective-risk metrics rather than AUROC alone, and add hidden-state probes only when locked validation on the target distribution shows stable operating gains that justify white-box complexity.
+\end{abstract}
+
+
+
+\begin{highlights}
+\item Frames finite-choice SLM abstention as a cost-aware reliability-signal selection problem.
+\item Adds a locked train/validation/test protocol that selects probes and PCA dimensions without using the final test fold.
+\item Shows that hidden-state gains in a diagnostic envelope do not survive locked deployment selection on the main MCQ suite.
+\item Expands auxiliary finite-choice checks to AG News, TREC, and DBPedia across three 7B/8B-class models, plus Banking77, while keeping the main claim tied to the 24-condition MCQ suite.
+\item Provides a deployment rule: start with confidence/option scores; deploy hidden probes only after target-distribution validation.
+\end{highlights}
+
+\begin{keyword}
+small language models \sep selective prediction \sep abstention \sep uncertainty estimation \sep hidden states \sep reliability \sep cost-aware machine learning \sep finite-choice classification
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+Small language models (SLMs) are attractive for resource-constrained deployment because they reduce memory requirements, latency, and dependence on proprietary frontier-scale systems. Yet lower cost does not imply reliable decision-making. In many applications, the relevant question is not only which answer the model gives, but whether the system should answer at all. Selective prediction formalizes this decision by allowing a model to abstain on examples whose predicted risk is too high, thereby trading coverage for lower selective error \citep{geifman2017selective,geifman2019selectivenet}.
+
+Language-model reliability research offers many uncertainty signals. Confidence and option-likelihood statistics are inexpensive and available from a single scoring pass. Hidden-state probes are more expressive and may reveal internal correctness or hallucination-related information \citep{chen2024inside,orgad2024llms}. Sampling-based methods can capture answer instability or semantic inconsistency, but they require multiple generations \citep{manakul2023selfcheckgpt,farquhar2024semanticentropy}. A deployment engineer therefore faces a stricter question than whether a signal correlates with correctness: does the signal improve selective risk enough to justify its cost over strong cheap baselines?
+
+This paper answers that question in answerable multiple-choice question answering (MCQ), used here as a controlled instance of finite-choice SLM decision-making. The finite-choice interface is practically important because many deployed systems ask a model to choose among candidate labels, actions, risk classes, routes, or retrieved answers rather than to produce an unconstrained long-form response. The setting also provides measurement clarity: each example has an automatic correctness label, option scores are available, and selective risk, coverage, AURC, and E-AURC can be computed without human or LLM-as-judge uncertainty.
+
+The MCQ setting is not used here as a claim that all real language-model reliability problems are multiple-choice. It is used as a controlled instance of a broader class of finite-choice SLM systems. Many deployed systems restrict the model to choosing among candidate labels, actions, routes, risk classes, retrieved answers, or response options. In such systems, option likelihoods and confidence margins are directly available, and abstention has a concrete operational meaning: the system can ask a human, call a larger model, retrieve more evidence, or defer the decision. Table~\ref{tab:finite-choice-use-cases} summarizes representative settings where the MCQ formulation maps naturally to real deployment decisions.
+
+This study treats reliability estimation as a cost-aware signal-selection problem rather than a search for a larger feature set. The key question is whether a richer signal remains useful after cheaper signals have already been exploited. This incremental-utility perspective is important because a signal can be predictive in isolation yet operationally redundant once confidence, margin, entropy, and option-score evidence are available. The novelty is therefore an audit/protocol contribution: a locked, cost-aware evaluation of the incremental utility of hidden probes under finite-choice deployment constraints, not a new uncertainty estimator or a new theory of model internals. We compare confidence/option features, hidden-state summaries, PCA-compressed hidden embeddings, learned probes, layer-localized probes, sampling diagnostics, sample-size sensitivity, and measured latency/VRAM cost. The main MCQ suite supports a deployment-oriented redundancy principle: hidden representations contain reliability signal, but much of their deployable value overlaps with option-confidence evidence. The broader auxiliary AG News, TREC, DBPedia, and Banking77 extensions make the conclusion more precise without overextending the main claim: hidden probes are not universally useless or universally superior; their value is heterogeneous and must be established by locked validation on the target finite-choice distribution.
+
+
+The study is organized around four research questions:
+\begin{description}
+    \item[RQ1.] How strong are cheap confidence and option-score features for failure prediction in answerable finite-choice SLM tasks?
+    \item[RQ2.] Do hidden-state signals provide incremental reliability value beyond confidence/option features?
+    \item[RQ3.] Are hidden-state gains stable across model families, datasets, layer locations, PCA dimensionality, probe strength, and sample size?
+    \item[RQ4.] Are richer reliability signals cost-effective when latency, memory, white-box access, activation handling, and validation burden are considered?
+\end{description}
+
+The contributions are:
+
+\begin{enumerate}
+    \item We formulate finite-choice SLM abstention as a cost-aware reliability-signal selection problem, where the relevant criterion is incremental risk--coverage utility over cheap confidence/option baselines.
+    \item We evaluate three sub-2B open-weight models across seven datasets and extend the main audit to six protocol-compatible 7B/9B-class model families across four representative MCQ datasets, with DeepSeek-R1-Distill-Qwen-7B reported separately as a forced-choice protocol stress test.
+    \item We introduce a locked train/validation/test analysis in which probe family, PCA dimension, hyperparameters, and threshold-relevant selectors are chosen without touching the final test split.
+    \item We add auxiliary non-MCQ finite-choice checks on AG News, TREC, and DBPedia with Qwen2.5-7B, Llama-3.1-8B, and Mistral-7B-v0.3, plus a small Banking77 routing check, to test whether the MCQ redundancy result is task-dependent without using these checks as the main evidence.
+    \item We report deployment-facing metrics: AUROC, AUPRC for failure detection, fixed-coverage risk, AURC, E-AURC, failure capture under abstention, failure counts, and a per-1000-query cost-utility interpretation.
+    \item We provide a deployable decision rule: start with confidence/option signals and add hidden probes only when target-distribution locked validation shows stable gains large enough to justify white-box access, feature extraction, probe training, and maintenance.
+\end{enumerate}
+
+\input{tables/table_scope.tex}
+\input{tables/table_finite_choice_use_cases.tex}
+\input{tables/table_novelty.tex}
+\FloatBarrier
+
+\section{Related work}
+\subsection{Selective prediction and abstention}
+Selective prediction studies classifiers that can reject or abstain when predicted risk is too high. Confidence-thresholding is a natural baseline, and SelectiveNet integrates a rejection option into the model itself \citep{geifman2017selective,geifman2019selectivenet}. In language models, abstention is increasingly studied as a safety and reliability behavior. Recent surveys and benchmarks distinguish answer failure from unanswerability, false premises, ambiguity, and stale information \citep{wen2025limits,kirichenko2025abstentionbench}. Our study is narrower: all questions are answerable MCQs, and abstention is triggered by predicted answer failure.
+
+\subsection{Confidence, calibration, and uncertainty}
+Maximum softmax probability is a classical and still competitive error-detection baseline \citep{hendrycks2017baseline}. Calibration work shows that confidence values can be systematically miscalibrated even when accuracy is high \citep{guo2017calibration}. For language models, uncertainty may arise from lack of knowledge, unstable reasoning, ambiguous prompts, or decoding variability. Work on self-evaluation and MCQ uncertainty shows that models may expose useful confidence information, but that evaluation design strongly affects conclusions \citep{kadavath2022lmknow,wang2025ubench}. This work focuses on incremental value under deployment constraints: confidence/option baselines are treated as strong default signals that richer probes must improve upon.
+
+\subsection{Sampling and semantic consistency}
+Sampling-based approaches estimate uncertainty by generating multiple responses and measuring agreement or semantic consistency. Self-consistency improves reasoning by marginalizing over multiple chains of thought \citep{wang2023selfconsistency}. SelfCheckGPT and semantic entropy detect hallucination or confabulation by comparing multiple generated outputs \citep{manakul2023selfcheckgpt,farquhar2024semanticentropy}. These approaches are important for open-ended generation, but they require repeated inference. Our five-sample baseline is therefore used as a cost diagnostic rather than as a full semantic-entropy evaluation.
+
+\subsection{Hidden-state reliability signals}
+Several studies suggest that internal representations encode truthfulness, hallucination, or answer correctness information \citep{chen2024inside,orgad2024llms,ji2024internal}. This paper complements that literature by measuring a deployment-specific residual question: once confidence and option scores are included, how much additional value remains in hidden-state summaries or PCA-compressed hidden embeddings? A hidden representation can be informative in isolation and still be operationally redundant when the model's option distribution already exposes the relevant uncertainty.
+
+
+\subsection{Cost-aware reliability signal selection}
+Most uncertainty work compares signals primarily by predictive performance. Deployment, however, requires an incremental-value criterion: a signal that is informative in isolation may still be redundant once cheaper signals are available. This distinction is especially important in finite-choice settings, where option probabilities, margins, and entropy are directly tied to the scored candidate set rather than being generic confidence proxies. Our study therefore evaluates reliability estimation as a signal-selection problem under resource and access constraints. The relevant question is not only whether hidden states predict correctness, but whether they improve selective risk beyond confidence and option evidence enough to justify white-box access, activation handling, probe training, and validation cost.
+
+\section{Problem formulation}
+Let $x$ denote an MCQ prompt and $A=\{a_1,\ldots,a_K\}$ denote candidate options. A language model assigns score $s(x,a_k)$ to each option and predicts
+\begin{equation}
+\hat{y}=\arg\max_{a_k\in A} s(x,a_k).
+\end{equation}
+Given ground-truth answer $y$, correctness and failure are
+\begin{equation}
+c=\mathbb{1}[\hat{y}=y], \qquad f=1-c.
+\end{equation}
+A reliability predictor receives a signal vector $z$ and estimates
+\begin{equation}
+r=P(c=1\mid z),
+\end{equation}
+where $z$ may contain confidence features, option scores, hidden-state summaries, PCA-compressed hidden embeddings, or sampling agreement. A selective policy answers when $r\geq\tau$ and abstains otherwise. Coverage and selective risk are
+\begin{equation}
+\mathrm{coverage}(\tau)=\frac{1}{n}\sum_{i=1}^{n}\mathbb{1}[r_i\geq\tau],
+\end{equation}
+\begin{equation}
+\mathrm{risk}(\tau)=\frac{\sum_i \mathbb{1}[r_i\geq\tau]\mathbb{1}[\hat{y}_i\neq y_i]}{\sum_i \mathbb{1}[r_i\geq\tau]}.
+\end{equation}
+Retained accuracy is $1-\mathrm{risk}(\tau)$. We report AUROC for failure-prediction ranking and selective-classification metrics for deployment: risk at fixed coverage, AURC, E-AURC, and failure capture at fixed abstention.
+
+\section{Experimental design}
+\subsection{Models and datasets}
+The sub-2B motivating study uses Qwen2.5-0.5B-Instruct, Qwen2.5-1.5B-Instruct, and TinyLlama-1.1B-Chat across ARC-Challenge, ARC-Easy, OpenBookQA, CommonsenseQA, BoolQ, HellaSwag, and MMLU \citep{clark2018arc,mihaylov2018openbookqa,talmor2019commonsenseqa,clark2019boolq,zellers2019hellaswag,hendrycks2021mmlu,yang2024qwen,zhang2024tinyllama}. The primary expanded analysis uses six protocol-compatible 7B/9B-class instruction models: Qwen2.5-7B-Instruct, Mistral-7B-Instruct-v0.3, Falcon3-7B-Instruct, OLMo-2-1124-7B-Instruct, Gemma-2-9B-IT, and Llama-3.1-8B-Instruct \citep{yang2024qwen,jiang2023mistral,falcon3modelcard,olmo22025}. The four locked-analysis MCQ datasets are ARC-Challenge, CommonsenseQA, HellaSwag, and MMLU. ARC-Challenge has 299 examples; the other MCQ datasets use 1000 examples per model. The auxiliary non-MCQ finite-choice block adds AG News (4 labels, 1000 examples per model), TREC (6 labels, 480 examples per model), and DBPedia (14 labels, 1400 examples per model) for Qwen2.5-7B, Llama-3.1-8B-Instruct, and Mistral-7B-Instruct-v0.3, plus Banking77 (77 labels, 200 examples) for Qwen2.5-7B.
+
+\input{tables/table_base_accuracy.tex}
+\input{tables/table_locked_failure_counts.tex}
+
+The failure-count table is included because failure prediction can be unstable when the failure class is small. For example, Gemma-2-9B-IT reaches high ARC-Challenge accuracy and leaves only 24 failures in the full condition and five failures in each held-out test split. AUROC and selective-risk estimates should therefore be interpreted together with failure counts, AUPRC, fixed-abstention failure capture, and bootstrap intervals rather than as isolated point estimates.
+
+DeepSeek-R1-Distill-Qwen-7B is retained only as a forced-choice protocol stress test \citep{deepseek2025r1}. Its option-scoring accuracy is much lower than the ordinary instruction models, which suggests that strict short-option likelihood scoring is not a comparable interface for this reasoning-distilled checkpoint. We therefore make the six-model protocol-compatible subset the primary analysis and report DeepSeek separately in Section~\ref{sec:deepseek-stress}.
+
+\subsection{Reliability signals}
+We compare seven feature families. First, direct max-option probability uses the model's top option probability without an additional learned selector when available. Second, confidence/option features include top probability, second probability, probability margin, logit margin, entropy, and option scores. Third, hidden summaries compute mean, standard deviation, norm, extrema, and absolute mean from final-token hidden states across selected layers. Fourth, PCA hidden embeddings use raw selected-layer hidden vectors compressed by PCA. Fifth, hidden-augmented features concatenate confidence/option features with hidden summaries or PCA embeddings. Sixth, a supervised contrastive hidden-state probe is added for Gemma and Llama to test whether weak hidden-state gains are merely a probe-strength artifact. Seventh, repeated sampling uses five stochastic generations and agreement-like features as a high-cost diagnostic.
+
+\subsection{Probes and validation protocol}
+The primary deployable analysis uses the locked protocol in Table~\ref{tab:locked-protocol}. For each model--dataset--seed condition, examples are split into 60\% train, 20\% validation, and 20\% held-out test folds stratified by correctness. Scalers and PCA transformations are fitted on the train split only. Probe family, PCA dimension, and logistic regularization strength are selected on the validation split only. The final AUROC, AUPRC-failure, Risk@coverage, AURC, E-AURC, and failure-capture metrics are then reported once on the protected test split.
+
+\input{tables/table_locked_protocol.tex}
+
+The broader best-probe tables are retained as a diagnostic upper-bound envelope. They answer a different question: whether any tested hidden-state configuration contains correctness-related information under favorable probe selection. They are not used as the primary deployable estimate. This separation is important because hidden-augmented feature families have more degrees of freedom than confidence/option baselines; the locked protocol is therefore the main evidence used for deployment claims.
+
+Sample-size sensitivity evaluates 100, 300, 500, and 1000 examples where available. Layer localization separately tests early, middle, late, final, and all selected layers.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.98\linewidth]{Asset_2_100.jpg}
+    \caption{Cost-aware reliability signal selection pipeline for answerable finite-choice SLMs. The figure separates deployment-time signal flow from train/validation-only correctness labels and summarizes the audit checks used to decide whether hidden-state probes justify their added cost.}
+    \label{fig:pipeline}
+\end{figure}
+
+\section{Results}
+\subsection{Sub-2B study: strong cheap baselines motivate the audit}
+The sub-2B study establishes the central tension. For Qwen2.5-1.5B across seven datasets, confidence/option signals average 0.800 AUROC, while the best hidden-augmented summary family averages 0.792. Five-seed larger-sample sensitivity reaches 0.788$\pm$0.021 AUROC for confidence/option signals and 0.784$\pm$0.027 for hidden-augmented summaries. Non-linear probes over existing feature files do not reverse the conclusion: across 21 sub-2B model--dataset cases, the best confidence/option family averages 0.669 AUROC and confidence/option plus hidden summaries averages 0.663. These results motivate the stricter locked 7B/9B-class analysis below.
+
+\subsection{Primary locked train/validation/test analysis}
+Table~\ref{tab:locked-primary} is the primary deployable result for the 24-condition MCQ suite. It selects probe variants, PCA dimensions, and logistic regularization using validation data only and reports held-out test performance. Under this stricter protocol, confidence/option evidence is the strongest selector: it reaches 0.799 AUROC, 0.570 failure-detection AUPRC, 0.190 Risk@80\%, and 0.115 AURC. Confidence/option plus PCA-hidden features underperforms slightly, reaching 0.782 AUROC, 0.558 AUPRC-failure, 0.192 Risk@80\%, and 0.120 AURC. PCA-hidden features alone are substantially weaker.
+
+\input{tables/table_locked_primary.tex}
+
+The paired deltas in Table~\ref{tab:locked-paired-deltas} show the same pattern within matched model--dataset--seed conditions. Hidden augmentation decreases AUROC by 0.0169 on average and decreases AUPRC-failure by 0.0124. It also slightly increases Risk@80\% and AURC, although the selective-risk deltas are small. Thus the small gains observed in the earlier diagnostic envelope do not survive validation-locked selector choice. This directly addresses the risk of optimistic selection bias from best-probe reporting.
+
+\input{tables/table_locked_paired_deltas.tex}
+\input{tables/table_condition_cluster_bootstrap.tex}
+\input{tables/table_low_failure_sensitivity.tex}
+\input{tables/table_all_primary_summary.tex}
+
+\input{tables/table_locked_cost_utility.tex}
+
+At 80\% coverage, the locked confidence/option selector retains about 151.9 errors among 800 answered cases per 1000 finite-choice queries. The locked hidden-augmented selector retains about 153.3 errors. Hidden augmentation therefore avoids no additional errors in this main MCQ analysis; it slightly increases retained errors while requiring white-box access, hidden-state extraction, PCA fitting, probe validation, and maintenance. This supports the default rule that hidden probes should not be deployed automatically when cheap option-confidence evidence is available.
+
+
+\subsection{Auxiliary non-MCQ finite-choice checks: broader target-domain evidence}
+\label{sec:nonmcq-extensions}
+The main MCQ result does not imply that hidden probes are never useful. Table~\ref{tab:nonmcq-extensions} reports a broader auxiliary finite-choice classification block. AG News casts news topic classification as a 4-way label-selection task; TREC casts question classification as a 6-way label-selection task; DBPedia casts ontology classification as a 14-way label-selection task. Each is evaluated with Qwen2.5-7B, Llama-3.1-8B, and Mistral-7B-v0.3. Banking77 is retained as a small 77-way Qwen2.5-7B customer-support routing stress check. These 10 auxiliary conditions are not a replacement for the main 24-condition MCQ suite, and they should not be read as a comprehensive non-MCQ benchmark. They directly address the concern that the original evidence was too MCQ-bound while remaining classification-style finite-choice tasks rather than full deployed decision pipelines.
+
+The auxiliary results are heterogeneous rather than uniformly positive. Across the nine AG News/TREC/DBPedia conditions, confidence/option plus PCA-hidden features improve the average AUROC from 0.857 to 0.866, AUPRC-failure from 0.653 to 0.680, Risk@80\% from 0.154 to 0.151, and AURC from 0.096 to 0.093. The largest gains occur for Mistral on DBPedia and TREC. However, confidence/option remains best for several Llama and Qwen operating points, and the condition-cluster confidence intervals include small or zero average gain. Banking77 also shows hidden-state value, especially for AUPRC-failure and AURC, but it is deliberately treated as a small 77-way stress check. The correct interpretation is therefore conditional: hidden probes can add value in some finite-choice target domains, but they should be deployed only after validation-locked evidence shows stable utility beyond the cheap selector.
+
+\input{tables/table_nonmcq_extensions.tex}
+\FloatBarrier
+
+These checks change the manuscript from a narrow ``hidden states do not help'' result into a deployment rule. Confidence/option evidence is the safest default for MCQ-style option scoring; hidden probes become candidates for deployment when target-domain validation shows enough operating gain to justify activation extraction and maintenance. They support task-dependence, not a broad claim that hidden probes will improve all non-MCQ finite-choice systems.
+
+
+\subsection{Diagnostic upper-bound envelope: hidden states contain signal but do not yield robust deployable gains}
+The best-probe envelope is retained only as a diagnostic upper bound. It asks whether the tested hidden-state feature families can reveal correctness-related information under favorable probe selection; it should not be read as a locked deployment result. In this envelope, confidence/option features average 0.800 AUROC on the protocol-compatible six-model subset, while confidence/option plus PCA-hidden features reach 0.807. Across all 28 cases including the DeepSeek stress test, the corresponding gain is 0.772 to 0.777. These values show that hidden states contain signal, but the gain is small and disappears under locked validation.
+
+\input{tables/table_overall_probe.tex}
+\input{tables/table_hidden_gain.tex}
+\input{tables/table_per_condition_deltas.tex}
+\input{tables/table_paired_tests.tex}
+
+\subsection{Forced-choice protocol stress test: DeepSeek-R1-Distill-Qwen-7B}
+\label{sec:deepseek-stress}
+Table~\ref{tab:locked-deepseek-stress} reports DeepSeek-R1-Distill-Qwen-7B separately under the locked protocol. Its low forced-choice accuracy does not imply poor general reasoning ability; rather, it shows that reasoning-distilled checkpoints may not expose option likelihoods that are directly comparable under strict short-answer option scoring. The stress test is useful because it exposes a deployment boundary: the proposed audit assumes that the SLM can be meaningfully used as a finite-choice option scorer. When that assumption fails, reliability-signal comparisons should not be pooled with ordinary finite-choice scoring results.
+
+\input{tables/table_locked_deepseek_stress.tex}
+
+\subsection{Selective prediction diagnostics and operating curves}
+The locked protocol makes confidence/option evidence the strongest deployable selector, but the broader selective diagnostics remain useful because they show how rankings translate into operating points. Table~\ref{tab:selective-fixed} reports fixed-coverage risk, AURC, E-AURC, and failure capture from the diagnostic envelope. The operating differences are small even when hidden augmentation is allowed favorable probe selection, which is consistent with the locked result and supports the redundancy interpretation.
+
+\input{tables/table_selective_fixed.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.74\linewidth]{fig_selective_fixed_coverage.pdf}
+    \caption{Selective risk at fixed coverage for expanded finite-choice evaluation. Lower risk is better. Hidden augmentation changes operating risk only slightly compared with confidence/option-based selection, supporting the cost-aware redundancy conclusion.}
+    \label{fig:selective-fixed}
+\end{figure}
+
+\subsection{Stronger and localized hidden-state probes}
+The locked result should not be misread as evidence that hidden states are empty of correctness information. Layer analysis in Table~\ref{tab:layer-localization} shows that hidden-only AUROC increases from early to late/final layers. PCA-dimension sensitivity in Table~\ref{tab:pca-dim} shows that retaining more hidden variance does not automatically produce more deployable utility. The supervised contrastive probe in Table~\ref{tab:contrastive} is a further sensitivity check: on Gemma and Llama it does not overturn the confidence/option baseline. Together, these analyses support a narrow claim about the tested practical hidden-state families: summaries, PCA embeddings, layer-localized features, and supervised contrastive probes can encode correctness information, but they do not reliably add locked-test operating value beyond option-confidence evidence in this finite-choice setting.
+
+\input{tables/table_layer_localization.tex}
+\input{tables/table_pca_dim.tex}
+\input{tables/table_contrastive.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.72\linewidth]{fig_layer_localization_gain.pdf}
+    \caption{Layer-wise localization of hidden reliability signal. Later layers are more informative as hidden-only features, but their incremental value over confidence/option features remains limited.}
+    \label{fig:layer-localization}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.75\linewidth]{fig_pca_gain_sensitivity.pdf}
+    \caption{Incremental hidden-state gain across PCA dimensions. Increasing hidden dimensionality does not reliably improve the hidden-augmented selector.}
+    \label{fig:pca-gain}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.72\linewidth]{fig_contrastive_probe.pdf}
+    \caption{Stronger supervised contrastive hidden-state probe on Gemma and Llama. Contrastive hidden features do not overturn the confidence/option baseline, supporting the redundancy interpretation.}
+    \label{fig:contrastive}
+\end{figure}
+
+\subsection{Redundancy, sample size, and cost diagnostics}
+Group-permutation and redundancy diagnostics explain why confidence/option evidence dominates. Table~\ref{tab:importance-redundancy} shows that permuting the confidence/option group causes a larger AUROC drop than permuting the PCA-hidden group. Sample-size sensitivity in Table~\ref{tab:sample-size} shows that larger subsets narrow uncertainty but do not make hidden-augmented probes decisively dominate. The cost analysis separates measured and deployment-dependent costs. The measured quantities are latency and VRAM diagnostics in Table~\ref{tab:latency}, together with activation-storage and probe-fit accounting in Table~\ref{tab:operational-cost-quantification}. These show that hidden readout is near single-pass scoring and much cheaper than repeated generation. The larger operational costs are not fully captured by latency: white-box access, activation hooks, hidden-state storage, probe retraining, monitoring, version migration, and maintenance are deployment-dependent burdens. The paper's cost claim should therefore be read as a cost-accounting framework plus measured diagnostics, not as a universal hardware-independent total-cost estimate.
+
+\input{tables/table_importance_redundancy.tex}
+\input{tables/table_sample_size.tex}
+\input{tables/table_latency.tex}
+\input{tables/table_operational_cost_quantification.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.72\linewidth]{fig_group_importance.pdf}
+    \caption{Group-permutation importance in the combined predictor. Confidence/option features make the larger independent contribution.}
+    \label{fig:group-importance}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.78\linewidth]{fig_latency_vram_cost.pdf}
+    \caption{Measured latency and memory diagnostics. Hidden readout is close to single-pass scoring, while repeated generation is much more expensive.}
+    \label{fig:latency}
+\end{figure}
+
+\FloatBarrier
+
+\section{Discussion}
+\subsection{The main insight: redundancy, not absence of signal}
+The strongest scientific interpretation is not that hidden states are uninformative. The evidence shows the opposite: PCA hidden embeddings outperform summary-only hidden features, later layers contain stronger hidden-only reliability signal, and the broader non-MCQ extensions show heterogeneous but sometimes positive hidden-probe value. The central finding is task-dependent incremental utility. In forced-choice MCQ scoring, probability margin, entropy, and option likelihoods already summarize much of the model's separation between the chosen answer and alternatives, so hidden augmentation is operationally redundant under locked validation. In the auxiliary AG News, TREC, DBPedia, and Banking77 checks, hidden features add useful signal in some target-domain operating points but not uniformly. This turns the result from a negative hidden-state claim into a deployment principle: an informative signal is useful only when it adds stable target-domain operating value beyond cheaper evidence.
+
+\subsection{Why finite-choice evaluation can still matter in practice}
+Finite-choice SLM systems are a practical deployment class in their own right. In educational tutoring, customer-support routing, moderation, compliance screening, cybersecurity triage, risk categorization, candidate-answer selection, and tool/action selection, the model often chooses from an explicit candidate set. The reliability problem is then not whether the model can generate a fluent paragraph, but whether the selected option is trustworthy enough to act on. This is exactly the setting where confidence margins, option likelihoods, and selective abstention are operationally meaningful. The present results are therefore best interpreted as guidance for finite-choice SLM decision pipelines: start with cheap option-confidence signals, measure risk--coverage on the target distribution, and add hidden probes only when their incremental value is stable and practically meaningful.
+
+The finite-choice conclusion should not be read as a prediction that the same operating pattern will hold in open-ended generation. In long-form answers, retrieval-augmented generation, or false-premise prompts, uncertainty can arise from semantic ambiguity, missing evidence, unsupported claims, or inconsistent sampled meanings. Methods such as semantic entropy and SelfCheck-style consistency may therefore capture uncertainty modes that option margins cannot express. This distinction is precisely why the present study treats MCQ, Banking77, AG News, TREC, and DBPedia as finite-choice settings rather than proxies for all LLM reliability.
+
+\subsection{Why the expanded experiments strengthen novelty}
+The expanded experiments strengthen the empirical contribution. The study now includes a six-model primary 7B/9B-class audit plus a separate forced-choice stress test rather than a two-model check, reports fixed-coverage risk and AURC/E-AURC rather than relying only on AUROC, evaluates sample sizes up to 1000 examples, adds Gemma and Llama, includes a stronger contrastive hidden-state probe, and explains the hidden-state result through PCA sensitivity, layer localization, group importance, and redundancy diagnostics. The AG News, TREC, DBPedia, and Banking77 checks further show that the result is not a trivial ``hidden states never help'' finding, while their auxiliary status keeps the main claim tied to the MCQ suite. The contribution is a cost-aware locked-validation audit that distinguishes diagnostic signal, deployable incremental utility, and preliminary task-dependent value.
+
+
+\subsection{Deployment decision procedure}
+\label{sec:decision-rule}
+The empirical results can be summarized as a practical decision procedure. The threshold $\delta$ should be chosen before final testing by the deployment owner and should be tied to an explicit utility calculation. A practically meaningful gain should be defined in operating units, not only in AUROC: for example, a prespecified reduction in Risk@coverage, a reduction in AURC, or a minimum number of avoided retained errors per 1000 answered queries that exceeds the cost of adding a hidden probe. In the main locked MCQ scenario, hidden augmentation retains about 1.3 more errors per 1000 finite-choice queries than the cheap selector, so there is no positive utility case for default hidden-probe deployment on that suite. In contrast, the auxiliary finite-choice classification checks show positive target-domain gains in some model--dataset pairs, especially for Mistral on DBPedia/TREC and for Banking77. The decision rule should therefore be conditional rather than categorical: use cheap confidence/option evidence by default, and add hidden probes only when locked validation on the target task shows stable operating gains that exceed the deployment-chosen $\delta$.
+
+
+\begin{center}
+\fbox{%
+\begin{minipage}{0.94\linewidth}
+\small
+\textbf{Algorithm 1: Cost-aware reliability signal selection}\\[2mm]
+\textbf{Input:} validation set $D$, cheap signals $Z_c$, candidate costly signals $Z_h$, target coverage $q$, minimum practical gain $\delta$, cost constraints $C$.\\[1mm]
+\textbf{1.} Train or select a reliability model using $Z_c$.\\
+\textbf{2.} Evaluate AUROC, Risk@$q$, AURC, E-AURC, and failure capture on $D$.\\
+\textbf{3.} Train or select a reliability model using $Z_c \cup Z_h$.\\
+\textbf{4.} Compute paired gains in AUROC, Risk@$q$, AURC, and E-AURC across seeds or related validation splits.\\
+\textbf{5.} Estimate deployment cost: latency, memory, white-box access, activation storage, retraining, and maintenance burden.\\
+\textbf{Decision:} deploy $Z_h$ only if gains are stable, exceed $\delta$ in operating metrics, and satisfy $C$; otherwise deploy the cheap confidence/option selector.
+\end{minipage}}
+\end{center}
+
+
+This rule is deliberately conservative. It does not forbid hidden-state methods; it requires them to pass the same practical test as any costly reliability signal. The exact gain threshold is application-dependent. The important point is that hidden probes should be justified by incremental operating value, not by isolated hidden-only predictiveness.
+
+
+\section{Threats to validity}
+The main external-validity boundary is the finite-choice option-scoring interface. The results apply to systems where a model chooses among explicit candidate answers, labels, routes, tools, risk classes, or retrieved candidates and where option scores can be computed. They should not be transferred to unconstrained open-ended hallucination detection, free-form RAG faithfulness, long-form summarization, agentic tool planning, or false-premise abstention without a separate validation design, because those settings may expose uncertainty modes that are unavailable in option margins.
+
+First, the primary suite consists of answerable MCQs with automatic labels. This design enables rigorous selective-prediction evaluation and is directly relevant to finite-choice decision pipelines where candidate options are explicit, but it does not cover richer deployed workflows with changing candidate sets, interactive retrieval, or human-in-the-loop escalation. Second, the AG News, TREC, DBPedia, and Banking77 checks reduce the MCQ-only concern but remain deliberately auxiliary: they cover 10 finite-choice classification conditions rather than a full non-MCQ benchmark suite. They provide evidence of heterogeneous target-domain value, not a universal scaling law for non-MCQ classification. Third, although the expanded audit includes six primary 7B/9B-class model families plus a DeepSeek forced-choice stress test, it is not a scaling law over all SLMs, base models, 14B models, or frontier systems. Fourth, DeepSeek-R1-Distill-Qwen-7B performs poorly under direct forced-choice option scoring in this implementation; it is treated as a separate protocol stress test and not as a claim about the model's general reasoning ability. Fifth, the hidden-state conclusion is limited to the tested practical probe families: summary statistics, PCA-compressed embeddings, layer-localized features, standard learned selectors, and a supervised contrastive probe on Gemma/Llama. It should not be generalized to sparse autoencoders, causal activation directions, intervention-based probes, attention-spectral features, mechanistic circuits, or future representation methods without separate validation. Sixth, the five-sample baseline is lightweight and should not be read as a full semantic-entropy or chain-of-thought self-consistency evaluation. Seventh, latency and VRAM are hardware- and implementation-specific. The relative overheads are informative, but deployment studies should remeasure them under target batching, quantization, context length, and hardware conditions.
+
+
+\section{Implementation details}
+\label{sec:implementation-details}
+All MCQ and classification examples are converted to a fixed finite-choice scoring interface. For MCQ datasets, the prompt lists the question and candidate answer options. For Banking77, AG News, TREC, and DBPedia, the prompt lists candidate intent, topic, question-type, or ontology labels. Each candidate string is scored with the same context. For an option string $a_k$ with tokens $t_1,\ldots,t_m$, the option score is the length-normalized log likelihood
+\begin{equation}
+S_k=\frac{1}{m}\sum_{j=1}^{m}\log p_\theta(t_j\mid x,A,t_{<j}).
+\end{equation}
+The predicted answer is the option with the largest $S_k$. The cheap feature vector contains the maximum option probability, probability and logit margins, entropy of the option distribution, and per-option probability/logit features where available. No post-hoc temperature scaling is used in the primary locked analysis; learned reliability selectors map these raw features to correctness probabilities.
+
+Hidden features are extracted from final-token hidden states at selected layers. PCA-hidden features are produced by standardizing the train-split hidden matrix and fitting PCA only on the train split. Validation and test hidden features are transformed using the train-fitted scaler and PCA basis. The locked analysis uses PCA dimensions $16$, $32$, and $64$ and logistic regularization $C\in\{0.1,1,10\}$. The validation split selects the candidate within each feature family, and the held-out test split is evaluated once. The five seeds generate repeated stratified splits over the same model--dataset example pool; they are therefore treated as repeated split estimates rather than fully independent datasets. In addition to paired condition--seed tests, the revised analysis reports a condition-cluster bootstrap that resamples model--dataset conditions and then resamples seeds within conditions. Failure-detection AUPRC treats failures as the positive class; AUROC is reported for correctness ranking, so higher values indicate better separation of correct and incorrect answers.
+
+The repeated-sampling diagnostic uses five stochastic samples and agreement-like features; it is included as a lightweight cost comparison rather than as a full semantic-entropy or self-consistency study. Hardware-dependent latency and VRAM are reported as diagnostic quantities only and should be remeasured under target deployment batching, context length, quantization, and hardware.
+
+\section{Reproducibility}
+\input{tables/table_reproducibility.tex}
+All reported tables and figures are generated from the current result package. The reproducibility artifact contains the notebook, extraction scripts, locked-validation script, processed result tables, figures, and environment information needed to reproduce the main analyses. For final submission, the GitHub repository URL and Zenodo DOI should be inserted after archival. Model weights are not redistributed; the artifact lists the public model and dataset identifiers required for reruns, including gated checkpoints that require user-side access approval.
+
+
+\section{Conclusion}
+This paper studied cost-aware selective prediction for finite-choice SLMs. The central question was not whether hidden states contain correctness information in isolation, but whether they add deployable selective-prediction value after confidence, margin, entropy, and option-score evidence are already available. On the main 24-condition MCQ suite, a diagnostic best-probe envelope shows that hidden states can contain reliability signal, but the primary locked train/validation/test analysis shows that these apparent gains do not survive validation-based selector choice: confidence/option evidence remains the strongest deployable signal on the six protocol-compatible 7B/9B-class model families. At 80\% coverage, hidden augmentation retains slightly more errors per 1000 finite-choice queries than the cheap selector. The auxiliary non-MCQ finite-choice checks add a deployment nuance: hidden features can help in some practical label-selection settings, but the gains are heterogeneous and do not replace the main MCQ evidence. The resulting design principle is conservative and practical: start with confidence/option-based abstention, report selective risk and failure-capture metrics rather than AUROC alone, and add hidden-state probes only when target-distribution locked validation demonstrates a stable operating gain that justifies white-box access, activation handling, and maintenance cost.
+
+\section*{CRediT authorship contribution statement}
+Nazim-E-Alam: Conceptualization, methodology, software, validation, formal analysis, investigation, visualization, writing -- original draft, writing -- review and editing.
+
+\section*{Declaration of competing interest}
+The author declares no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Data and code availability}
+The experiments use publicly available model checkpoints and benchmark datasets. Code, configuration metadata, processed result tables, locked-validation outputs, figure scripts, and environment information are provided in the reproducibility package and should be archived through a public GitHub release and Zenodo DOI before journal submission. Model weights are not redistributed; the artifact documents the required public model and dataset identifiers, including gated checkpoints that require user-side access approval.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the writing process}
+During preparation of this manuscript, AI-assisted writing support was used to organize structure, improve language, and format tables and figures. The author reviewed and edited the content, verified the reported numerical results against the experiment outputs, and takes full responsibility for the final manuscript.
+
+\section*{Funding}
+No external funding was received for this work.
+
+\section*{Acknowledgements}
+The author thanks the open-source model, dataset, and software communities for enabling reproducible small-language-model reliability research.
+
+\begin{thebibliography}{99}
+\bibitem[Casanueva et~al.(2020)]{casanueva2020banking77} Casanueva, I., Temcinas, T., Gerz, D., Henderson, M., Vulic, I., 2020. Efficient intent detection with dual sentence encoders. Proceedings of the 2nd Workshop on Natural Language Processing for Conversational AI.
+\bibitem[Chen et~al.(2024)]{chen2024inside} Chen, C., Liu, K., Chen, Z., Gu, Y., Wu, Y., Tao, M., Fu, Z., Ye, J., 2024. INSIDE: LLMs' internal states retain the power of hallucination detection. arXiv:2402.03744.
+\bibitem[Clark et~al.(2018)]{clark2018arc} Clark, P., Cowhey, I., Etzioni, O., Khot, T., Sabharwal, A., Schoenick, C., Tafjord, O., 2018. Think you have solved question answering? Try ARC, the AI2 Reasoning Challenge. arXiv:1803.05457.
+\bibitem[Clark et~al.(2019)]{clark2019boolq} Clark, C., Lee, K., Chang, M.-W., Kwiatkowski, T., Collins, M., Toutanova, K., 2019. BoolQ: Exploring the surprising difficulty of natural yes/no questions. NAACL-HLT, 2924--2936.
+\bibitem[DeepSeek-AI(2025)]{deepseek2025r1} DeepSeek-AI, 2025. DeepSeek-R1: Incentivizing reasoning capability in LLMs via reinforcement learning. arXiv:2501.12948.
+\bibitem[Farquhar et~al.(2024)]{farquhar2024semanticentropy} Farquhar, S., Kossen, J., Kuhn, L., Gal, Y., 2024. Detecting hallucinations in large language models using semantic entropy. Nature 630, 625--630.
+\bibitem[Geifman and El-Yaniv(2017)]{geifman2017selective} Geifman, Y., El-Yaniv, R., 2017. Selective classification for deep neural networks. NeurIPS.
+\bibitem[Geifman et~al.(2019)]{geifman2019selectivenet} Geifman, Y., Uziel, G., El-Yaniv, R., 2019. SelectiveNet: A deep neural network with an integrated reject option. ICML, 2151--2159.
+\bibitem[Guo et~al.(2017)]{guo2017calibration} Guo, C., Pleiss, G., Sun, Y., Weinberger, K.Q., 2017. On calibration of modern neural networks. ICML, 1321--1330.
+\bibitem[Hendrycks and Gimpel(2017)]{hendrycks2017baseline} Hendrycks, D., Gimpel, K., 2017. A baseline for detecting misclassified and out-of-distribution examples in neural networks. ICLR.
+\bibitem[Hendrycks et~al.(2021)]{hendrycks2021mmlu} Hendrycks, D., Burns, C., Basart, S., Zou, A., Mazeika, M., Song, D., Steinhardt, J., 2021. Measuring massive multitask language understanding. ICLR.
+\bibitem[Ji et~al.(2024)]{ji2024internal} Ji, Z., Lee, N., Frieske, R., Yu, T., Su, D., Xu, Y., Ishii, E., Bang, Y.J., Madotto, A., Fung, P., 2024. LLM internal states reveal hallucination risk faced with a query. BlackboxNLP Workshop, ACL.
+\bibitem[Jiang et~al.(2023)]{jiang2023mistral} Jiang, A.Q., Sablayrolles, A., Mensch, A., Bamford, C., Chaplot, D.S., de~las Casas, D., Bressand, F., Lengyel, G., Lample, G., Saulnier, L., et~al., 2023. Mistral 7B. arXiv:2310.06825.
+\bibitem[Jolliffe(2002)]{jolliffe2002pca} Jolliffe, I.T., 2002. Principal Component Analysis, second ed. Springer.
+\bibitem[Kadavath et~al.(2022)]{kadavath2022lmknow} Kadavath, S., Conerly, T., Askell, A., Henighan, T., Drain, D., Perez, E., Schiefer, N., et~al., 2022. Language models (mostly) know what they know. arXiv:2207.05221.
+\bibitem[Kirichenko et~al.(2025)]{kirichenko2025abstentionbench} Kirichenko, P., Ibrahim, M., Chaudhuri, K., Bell, S.J., 2025. AbstentionBench: Reasoning LLMs fail on unanswerable questions. arXiv:2506.09038.
+\bibitem[Lakshminarayanan et~al.(2017)]{lakshmi2017ensembles} Lakshminarayanan, B., Pritzel, A., Blundell, C., 2017. Simple and scalable predictive uncertainty estimation using deep ensembles. NeurIPS.
+\bibitem[Manakul et~al.(2023)]{manakul2023selfcheckgpt} Manakul, P., Liusie, A., Gales, M.J.F., 2023. SelfCheckGPT: Zero-resource black-box hallucination detection for generative large language models. EMNLP, 9004--9017.
+\bibitem[Mihaylov et~al.(2018)]{mihaylov2018openbookqa} Mihaylov, T., Clark, P., Khot, T., Sabharwal, A., 2018. Can a suit of armor conduct electricity? A new dataset for open book question answering. EMNLP, 2381--2391.
+\bibitem[OLMo Team(2025)]{olmo22025} OLMo Team, 2025. 2 OLMo 2 Furious. arXiv:2501.00656.
+\bibitem[Orgad et~al.(2024)]{orgad2024llms} Orgad, H., Toker, M., Gekhman, Z., Reichart, R., Szpektor, I., Kotek, H., Belinkov, Y., 2024. LLMs know more than they show: On the intrinsic representation of LLM hallucinations. arXiv:2410.02707.
+\bibitem[Paszke et~al.(2019)]{paszke2019pytorch} Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., et~al., 2019. PyTorch: An imperative style, high-performance deep learning library. NeurIPS, 8024--8035.
+\bibitem[Pedregosa et~al.(2011)]{pedregosa2011sklearn} Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M., et~al., 2011. Scikit-learn: Machine learning in Python. Journal of Machine Learning Research 12, 2825--2830.
+\bibitem[Talmor et~al.(2019)]{talmor2019commonsenseqa} Talmor, A., Herzig, J., Lourie, N., Berant, J., 2019. CommonsenseQA: A question answering challenge targeting commonsense knowledge. NAACL-HLT, 4149--4158.
+\bibitem[Technology Innovation Institute(2025)]{falcon3modelcard} Technology Innovation Institute, 2025. Falcon3-7B-Instruct model card. Hugging Face model repository.
+\bibitem[Wang et~al.(2023)]{wang2023selfconsistency} Wang, X., Wei, J., Schuurmans, D., Le, Q., Chi, E., Narang, S., Chowdhery, A., Zhou, D., 2023. Self-consistency improves chain-of-thought reasoning in language models. ICLR.
+\bibitem[Wang et~al.(2025)]{wang2025ubench} Wang, X., Zhang, Z., Li, Q., Chen, G., Hu, M., Li, Z., Luo, B., Gao, H., Han, Z., Wang, H., 2025. Benchmarking uncertainty in large language models with multiple-choice questions. Findings of ACL.
+\bibitem[Wen et~al.(2025)]{wen2025limits} Wen, B., Yao, J., Feng, S., Xu, C., Tsvetkov, Y., Howe, B., Wang, L.L., 2025. Know your limits: A survey of abstention in large language models. Transactions of the Association for Computational Linguistics 13.
+\bibitem[Wolf et~al.(2020)]{wolf2020transformers} Wolf, T., Debut, L., Sanh, V., Chaumond, J., Delangue, C., Moi, A., Cistac, P., et~al., 2020. Transformers: State-of-the-art natural language processing. EMNLP System Demonstrations, 38--45.
+\bibitem[Yang et~al.(2024)]{yang2024qwen} Yang, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Li, C., Liu, D., Huang, F., Wei, H., et~al., 2024. Qwen2.5 technical report. arXiv:2412.15115.
+\bibitem[Zellers et~al.(2019)]{zellers2019hellaswag} Zellers, R., Holtzman, A., Bisk, Y., Farhadi, A., Choi, Y., 2019. HellaSwag: Can a machine really finish your sentence? ACL, 4791--4800.
+\bibitem[Zhang et~al.(2024)]{zhang2024tinyllama} Zhang, P., Zeng, G., Wang, T., Lu, W., 2024. TinyLlama: An open-source small language model. arXiv:2401.02385.
+\bibitem[Zhang et~al.(2015)]{zhang2015character} Zhang, X., Zhao, J., LeCun, Y., 2015. Character-level convolutional networks for text classification. Advances in Neural Information Processing Systems.
+\end{thebibliography}
+
+\end{document}

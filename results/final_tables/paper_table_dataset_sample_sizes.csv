@@ -1,5 +1,0 @@
-dataset,available_loaded_examples,max_used_per_model_dataset,sample_size_sensitivity
-arc_challenge,,1000,"100,300,500,1000"
-commonsenseqa,,1000,"100,300,500,1000"
-hellaswag,,1000,"100,300,500,1000"
-mmlu_all,,1000,"100,300,500,1000"

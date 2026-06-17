@@ -1,0 +1,22 @@
+
+\begin{table}[t]
+\centering
+\small
+\caption{Probe-training and reporting protocol used for the reliability-signal audit.}
+\label{tab:probe-protocol}
+\begin{threeparttable}
+\begin{tabularx}{\textwidth}{p{0.25\textwidth}X}
+\toprule
+Component & Protocol \\
+\midrule
+Splits & For each model--dataset--seed condition, examples are split stratified by correctness into train and held-out test folds; the test fold is approximately 30\% of examples (e.g., 90 ARC-C examples, 300 examples for 1000-example datasets). \\
+PCA fitting & PCA is fitted only on the training fold and then applied to the held-out test fold. \\
+Probe families & Logistic regression, multilayer perceptron, ExtraTrees, and histogram-gradient boosting are trained separately for each feature family. Direct maximum option probability is reported without a learned probe. \\
+Best-probe envelope & Tables that report the best probe within a feature family should be read as a diagnostic upper-bound envelope: probe type is selected per model--dataset feature family after evaluating the candidate probes. This deliberately gives richer hidden-augmented families an opportunity to show value. \\
+Deployment interpretation & A deployment implementation should select probe type and hyperparameters on a separate validation set and report the locked selector on a held-out test set. The small hidden-state gains reported here are therefore not overstated as a deployable improvement claim. \\
+Paired comparison & Incremental gains are computed within the same model--dataset condition and summarized with paired bootstrap intervals and Wilcoxon signed-rank tests over conditions. \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}[flushleft]\footnotesize\item This protocol is intended to make the signal-selection claim conservative: if hidden augmentation provides only small gains even under a favorable best-probe envelope, it should not be deployed by default without target-distribution validation.\end{tablenotes}
+\end{threeparttable}
+\end{table}

@@ -1,0 +1,16 @@
+
+\begin{table}[t]
+\centering
+\small
+\caption{Sensitivity analysis excluding low-failure conditions. Values are mean deltas for confidence/option plus PCA-hidden selection relative to confidence/option selection after removing model--dataset conditions with fewer than the stated mean number of failures. The conclusion does not depend on the smallest-failure conditions: hidden augmentation remains near-tied or slightly worse on AUROC/AURC and only marginally better on AUPRC/Risk@80\% after filtering.}
+\label{tab:low-failure-sensitivity}
+\begin{tabular}{lrrrrrr}
+\toprule
+Mean failures kept & Conditions & Pairs & $\Delta$ AUROC & $\Delta$ AUPRC-fail & $\Delta$ Risk@80\% & $\Delta$ AURC \\
+\midrule
+$\geq$10 & 34 & 170 & -0.0086 & +0.0000 & -0.0006 & +0.0023 \\
+$\geq$25 & 33 & 165 & -0.0034 & +0.0019 & -0.0011 & +0.0013 \\
+$\geq$50 & 30 & 150 & -0.0003 & +0.0048 & -0.0012 & +0.0008 \\
+\bottomrule
+\end{tabular}
+\end{table}
