@@ -1,0 +1,238 @@
+%% Supplementary material for MLWA submission
+\documentclass[preprint,12pt]{elsarticle}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{adjustbox}
+\usepackage{threeparttable}
+\usepackage{placeins}
+\usepackage{pdflscape}
+\usepackage{float}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}}
+\emergencystretch=3em
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\makeatletter
+\let\originaltable\table
+\let\endoriginaltable\endtable
+\renewenvironment{table}[1][]{\originaltable[H]}{\endoriginaltable}
+\let\originalfigure\figure
+\let\endoriginalfigure\endfigure
+\renewenvironment{figure}[1][]{\originalfigure[H]}{\endoriginalfigure}
+\makeatother
+
+\begin{document}
+\begin{frontmatter}
+\title{Supplementary Material for ``Cost-Aware Reliability Signal Selection for Finite-Choice Small Language Models: A Locked Validation Study''}
+\author[aff1]{Nazim-E-Alam}
+\author[aff3,aff4]{Fahmid Al Farid}
+\author[aff1]{Syeda Asrafa Islam\corref{cor1}}
+\ead{syeda.asrafa@aiub.edu}
+\author[aff1]{Abdullah-Al-Jubair}
+\author[aff1]{Shakila Rahman}
+\author[aff1]{M.F. Mridha}
+\author[aff5]{Jia Uddin}
+\author[aff2]{Hezerul Abdul Karim\corref{cor1}}
+\ead{hezerul@mmu.edu.my}
+
+\cortext[cor1]{Corresponding authors.}
+
+\affiliation[aff1]{organization={American International University-Bangladesh (AIUB)}, city={Dhaka}, country={Bangladesh}}
+\affiliation[aff2]{organization={Program of Data Science and Analytics, Department of Mathematical and Physical Sciences, East West University}, city={Dhaka}, postcode={1212}, country={Bangladesh}}
+\affiliation[aff3]{organization={Centre for Image and Vision Computing (CIVC), Centre of Excellence for Artificial Intelligence, Faculty of Artificial Intelligence and Engineering (FAIE), Multimedia University}, city={Cyberjaya}, postcode={63100}, state={Selangor}, country={Malaysia}}
+\affiliation[aff4]{organization={Berlin School of Business \& Innovation (BSBI)}, country={Germany}}
+\affiliation[aff5]{organization={AI and Big Data Department, Woosong University}, city={Daejeon}, postcode={34606}, country={Republic of Korea}}
+\end{frontmatter}
+
+\section*{Purpose and interpretation}
+This supplement provides feature-schema provenance, strict output-only sensitivity, condition-level dependence analyses, selection sensitivity, failure prevalence, and operational results supporting the main manuscript. The broad estimand averages five repeated splits within each of the 24 model--dataset conditions, while the strict output-only sensitivity covers the eight Gemma-2/Llama-3.1 conditions whose archived lower-dimensional columns contain no layer-marked feature. Crossed model/dataset uncertainty, leave-one-cluster-out analyses, alternate validation objectives, and equal-budget selection are reported before diagnostic probe-envelope results. For risk metrics, lower values are better. Failure-detection AUPRC is prevalence-sensitive and should be read together with failure counts.
+
+\section{Feature-schema provenance and strict output-only sensitivity}
+The archived validator labels its lower-dimensional family \texttt{confidence\_}\allowbreak\texttt{option}. A pre-submission audit showed that this label maps to two different schemas: strict output-only columns for Gemma-2/Llama-3.1 and output columns plus three scalar layer-maximum summaries for Falcon3/Mistral/OLMo/Qwen. The broad 24-condition results are therefore interpreted as compact-summary results, and the eight-condition Gemma/Llama block is reported separately as the strict output-only sensitivity. This distinction is interpretive; the released CSV labels are preserved to maintain an exact link to the archived code and outputs.
+
+\input{tables/table_feature_schema_manifest.tex}
+\FloatBarrier
+\input{tables/table_strict_output_subset.tex}
+\FloatBarrier
+
+\begin{landscape}
+\section{Auxiliary finite-choice classification}
+\input{supplementary/table_S1_full_nonmcq_extensions.tex}
+\end{landscape}
+\FloatBarrier
+
+\clearpage
+\section{Scope, base accuracy, and failure prevalence}
+\input{tables/table_finite_choice_use_cases.tex}
+\FloatBarrier
+\input{tables/table_base_accuracy.tex}
+\FloatBarrier
+\begin{landscape}
+\input{tables/table_locked_failure_counts.tex}
+\FloatBarrier
+\end{landscape}
+
+\clearpage
+\section{Crossed dependence, weighting, and practical-effect sensitivity}
+\input{tables/table_crossed_dependence.tex}
+\FloatBarrier
+\input{tables/table_macro_weighted.tex}
+\FloatBarrier
+\input{tables/table_practical_effect_sensitivity.tex}
+\FloatBarrier
+\begin{landscape}
+\input{tables/table_model_dataset_effects.tex}
+\FloatBarrier
+\end{landscape}
+
+\clearpage
+\section{Selection-objective and search-budget sensitivity}
+\input{tables/table_selection_sensitivity.tex}
+\FloatBarrier
+\input{tables/table_validation_gap.tex}
+\FloatBarrier
+The equal-budget analysis fixes PCA dimension at 32 and retains three regularization candidates, matching the three-candidate lower-dimensional baseline grid. The alternate-objective analyses reselect archived candidates by validation AURC or validation Risk@80\%; no model inference is repeated.
+
+\clearpage
+\section{DeepSeek forced-choice compatibility audit}
+\input{tables/table_deepseek_compatibility.tex}
+\FloatBarrier
+The stress-test designation is post hoc and based on the observed near-chance answer-letter scoring accuracy. The complete selected reliability results are retained below rather than discarded.
+
+
+\clearpage
+\section{Primary locked-analysis sensitivity}
+\input{tables/table_locked_paired_deltas.tex}
+\FloatBarrier
+\input{tables/table_low_failure_sensitivity.tex}
+\FloatBarrier
+\input{tables/table_all_primary_summary.tex}
+\FloatBarrier
+
+\clearpage
+\section{Diagnostic probe envelope and condition-level results}
+The following diagnostic tables summarize a broader probe envelope and an earlier operating-point audit. They demonstrate that internal representations can encode correctness-related information, but the selection procedures differ from the primary validation-AUROC protocol and are therefore treated as supporting analyses. Labels such as ``confidence/option'' and ``cheap'' are preserved in these legacy diagnostic tables because they match the archived outputs; outside the eight strict Gemma/Llama conditions, they refer to the archived heterogeneous compact-summary schema.
+\input{tables/table_overall_probe.tex}
+\FloatBarrier
+\input{tables/table_hidden_gain.tex}
+\FloatBarrier
+\begin{landscape}
+\input{tables/table_per_condition_deltas.tex}
+\FloatBarrier
+\end{landscape}
+\input{tables/table_paired_tests.tex}
+\FloatBarrier
+\input{tables/table_locked_deepseek_stress.tex}
+\FloatBarrier
+\begin{landscape}
+\input{tables/table_selective_fixed.tex}
+\FloatBarrier
+\end{landscape}
+
+\clearpage
+\section{Layer, dimensionality, probe-strength, and sample-size sensitivity}
+\input{tables/table_layer_localization.tex}
+\FloatBarrier
+\input{tables/table_pca_dim.tex}
+\FloatBarrier
+\input{tables/table_contrastive.tex}
+\FloatBarrier
+\input{tables/table_importance_redundancy.tex}
+\FloatBarrier
+\begin{landscape}
+\input{tables/table_sample_size.tex}
+\FloatBarrier
+\end{landscape}
+
+\clearpage
+\begin{landscape}
+\section{Operational diagnostics}
+\input{tables/table_latency.tex}
+\FloatBarrier
+\end{landscape}
+
+\clearpage
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.82\linewidth]{fig_feature_family_auroc.pdf}
+\caption{Diagnostic AUROC across feature families. This figure belongs to the broader probe-envelope analysis rather than the primary validation-locked selector comparison.}
+\label{fig:s-feature-family}
+\end{figure}
+\end{landscape}
+\clearpage
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.75\linewidth]{fig_layer_localization_gain.pdf}
+\caption{Layer-localization sensitivity for hidden-state reliability signal.}
+\label{fig:s-layer}
+\end{figure}
+\end{landscape}
+\clearpage
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.75\linewidth]{fig_pca_dimension_sensitivity.pdf}
+\caption{PCA-dimension sensitivity. Increasing retained dimensionality does not consistently improve incremental utility.}
+\label{fig:s-pca}
+\end{figure}
+\end{landscape}
+\clearpage
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.88\linewidth]{fig_sample_size_sensitivity.pdf}
+\caption{Sample-size sensitivity across the available finite-choice conditions.}
+\label{fig:s-sample-size}
+\end{figure}
+\end{landscape}
+\clearpage
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.78\linewidth]{fig_redundancy_analysis.pdf}
+\caption{Feature-group redundancy diagnostics.}
+\label{fig:s-redundancy}
+\end{figure}
+\end{landscape}
+\clearpage
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.78\linewidth]{fig_selective_fixed_coverage.pdf}
+\caption{Selective risk at fixed coverage in the diagnostic audit.}
+\label{fig:s-selective}
+\end{figure}
+\end{landscape}
+\clearpage
+
+\clearpage
+\section{Artifact identifiers and exact implementation record}
+\input{tables/table_artifact_identifiers.tex}
+\FloatBarrier
+\input{tables/table_prompt_extraction_protocol.tex}
+\FloatBarrier
+
+\clearpage
+\section{Reproducibility details}
+The locked evaluator uses seeds $\{0,1,2,3,4\}$, a 60/20/20 stratified split by correctness, PCA dimensions $\{16,32,64\}$, logistic $C\in\{0.1,1,10\}$, the liblinear solver, balanced class weights, and a maximum of 1000 iterations. Standardization and PCA are fitted only on the training partition. A two-dimensional hidden array is used directly; if an archived hidden array is three dimensional, the evaluator selects the final stored layer. Candidate configuration is selected on validation data and evaluated once on its corresponding held-out split.
+
+For the public auxiliary extractor, the prompt requests exactly one category from a labeled candidate list and instructs the model to return only the answer letter. The model chat template is applied when available. Candidate answer letters are scored with mean token log likelihood, maximum sequence length 768, and option batch size four. Extraction defaults to NF4 4-bit model weights with double quantization and FP16 computation. The hidden vector is the final non-padding prompt token from the final transformer layer. AG News uses the test CSV, TREC uses the standard training source with documented fallback, DBPedia uses the test split, and balanced sampling uses random state 42. Exact checkpoint identifiers, dataset configurations, example identifiers, prompts, file manifests, and environment specifications accompany the artifact.
+
+The feature-schema audit is generated directly from the archived \texttt{cheap\_cols} field. A condition is classified as strict output-only only when that field contains no column name matching \texttt{layer}, \texttt{hidden}, \texttt{activation}, or \texttt{embedding}. The audit identifies eight strict conditions and sixteen compact internal-summary conditions. A whitelist patch for a future all-six-model output-only rerun is included with the analysis artifact but is not substituted for the archived results.
+
+Risk@80\% ranks held-out examples by predicted correctness and evaluates the highest-ranked 80\%; it is not a numerical threshold transferred from validation. The two-way bootstrap independently resamples the six model labels and four dataset labels with replacement for 50,000 replicates after seed averaging. Because only four datasets are available, the manuscript also reports leave-one-dataset-out and leave-one-model-out ranges and avoids equivalence claims.
+
+\end{document}

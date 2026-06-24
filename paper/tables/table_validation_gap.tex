@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Validation-to-test AUROC change for the validation-selected configuration. More negative values indicate greater validation optimism. The richer feature families show larger average degradation, consistent with the need for locked selection and equal-budget sensitivity.}
+\label{tab:validation-gap}
+\begin{tabular}{lrrr}
+\toprule
+Family & Mean test$-$validation & SD & Median \\
+\midrule
+Confidence/option & -0.0083 & 0.0621 & -0.0083 \\
+Confidence/option + PCA hidden & -0.0133 & 0.0819 & -0.0168 \\
+PCA hidden only & -0.0205 & 0.0910 & -0.0188 \\
+\bottomrule
+\end{tabular}
+\end{table}

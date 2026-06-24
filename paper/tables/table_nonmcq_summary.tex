@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Summary of auxiliary finite-choice classification checks. Full per-condition results are provided as Supplementary Table~S1. Lower Risk@80\% and AURC are better; higher AUROC and AUPRC-failure are better.}
+\label{tab:nonmcq-summary}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{llrrrr}
+\toprule
+Block & Selector & AUROC & AUPRC-fail & Risk@80\% & AURC \\
+\midrule
+AG/TREC/DBPedia (9 cond.) & Confidence/option & 0.857 & 0.653 & 0.154 & 0.096 \\
+AG/TREC/DBPedia (9 cond.) & Conf./option + PCA hidden & 0.866 & 0.680 & 0.151 & 0.093 \\
+Banking77 stress (1 cond.) & Confidence/option & 0.793 & 0.761 & 0.375 & 0.225 \\
+Banking77 stress (1 cond.) & Conf./option + PCA hidden & 0.830 & 0.819 & 0.344 & 0.223 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

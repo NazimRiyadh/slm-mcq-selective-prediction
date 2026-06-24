@@ -1,0 +1,18 @@
+
+\begin{table}[t]
+\centering
+\small
+\caption{Locked-protocol DeepSeek-R1-Distill-Qwen-7B forced-choice stress test. The model is reported separately because its strict option-likelihood behavior is not comparable to ordinary instruction-tuned finite-choice scorers.}
+\label{tab:locked-deepseek-stress}
+\begin{adjustbox}{max width=0.98\linewidth}
+\begin{tabular}{lcccc}
+\toprule
+Selector & AUROC & AUPRC-fail & Risk@80\% & AURC \\
+\midrule
+Confidence/option & 0.590 & 0.791 & 0.707 & 0.664 \\
+Confidence/option + PCA hidden & 0.564 & 0.769 & 0.720 & 0.678 \\
+PCA hidden only & 0.495 & 0.732 & 0.729 & 0.722 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

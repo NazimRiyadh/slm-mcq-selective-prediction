@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Strict output-only sensitivity on the eight Gemma-2/Llama-3.1 model--dataset conditions. Family values are equal-condition means. Deltas are augmentation minus output-only after averaging five splits within condition; intervals use a 50,000-replicate two-way model/dataset cluster bootstrap. Lower Risk@80\% and AURC are better.}
+\label{tab:strict-output-subset}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{lrrrrr}
+\toprule
+Selector & AUROC & AUPRC-fail & Risk@80\% & AURC & Fail recall \\
+\midrule
+Output-only & 0.819 & 0.567 & 0.167 & 0.094 & 0.486 \\
+Output-only + PCA hidden & 0.771 & 0.553 & 0.170 & 0.117 & 0.465 \\
+PCA hidden only & 0.604 & 0.368 & 0.216 & 0.193 & 0.296 \\
+\midrule
+Augmentation $\Delta$ & $-0.0474$ & $-0.0138$ & $+0.0034$ & $+0.0226$ & $-0.0211$ \\
+Two-way 95\% interval & $[-0.1201,-0.0073]$ & $[-0.0449,0.0117]$ & $[-0.0127,0.0136]$ & $[0.0100,0.0389]$ & $[-0.1000,0.0528]$ \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

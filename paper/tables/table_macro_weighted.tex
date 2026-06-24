@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Equal-condition macro averages and test-size-weighted averages on the 24-condition MCQ suite. Test-size weighting reduces the influence of the smaller ARC-Challenge test splits; it is not a pooled AUROC/AUPRC because repeated test splits overlap.}
+\label{tab:macro-weighted}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+& \multicolumn{2}{c}{AUROC} & \multicolumn{2}{c}{AUPRC-fail} & \multicolumn{2}{c}{Risk@80\%} & \multicolumn{2}{c}{AURC} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+Selector & Macro & Weighted & Macro & Weighted & Macro & Weighted & Macro & Weighted \\
+\midrule
+Compact summary & 0.799 & 0.793 & 0.570 & 0.579 & 0.190 & 0.208 & 0.115 & 0.127 \\
+Compact summary + PCA hidden & 0.782 & 0.781 & 0.558 & 0.569 & 0.192 & 0.210 & 0.120 & 0.131 \\
+PCA hidden only & 0.707 & 0.713 & 0.468 & 0.490 & 0.213 & 0.230 & 0.152 & 0.163 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

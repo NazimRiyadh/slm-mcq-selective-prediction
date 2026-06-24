@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Incremental AUROC value of hidden-state features over the confidence/option baseline in the final scaling audit.}
+\label{tab:hidden-gain}
+\resizebox{0.98\linewidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+Comparison & All mean gain & All SD & All positive & Competent mean gain & Competent SD & Competent positive \\
+\midrule
+Hidden summaries only & -0.063 & 0.048 & 3/28 & -0.057 & 0.040 & 2/24 \\
+PCA hidden only & -0.034 & 0.042 & 4/28 & -0.025 & 0.031 & 4/24 \\
+Conf./option + summaries & 0.001 & 0.021 & 13/28 & 0.001 & 0.017 & 12/24 \\
+Conf./option + PCA hidden & 0.004 & 0.018 & 19/28 & 0.008 & 0.013 & 18/24 \\
+\bottomrule
+\end{tabular}
+}%
+
+\par\smallskip
+\begin{minipage}{0.96\linewidth}\footnotesize\textit{Note.} Positive counts indicate model-dataset cases where the hidden-related feature family exceeded the cheap confidence/option baseline. The final audit shows more positive cases after adding Gemma and Llama, but the average gain remains small.\end{minipage}
+\end{table}

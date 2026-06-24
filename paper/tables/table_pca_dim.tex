@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\small
+\caption{PCA-dimension sensitivity for raw hidden embeddings in the final scaling audit.}
+\label{tab:pca-dim}
+\resizebox{0.98\linewidth}{!}{%
+\begin{tabular}{ccccccc}
+\toprule
+PCA dim. & Cheap AUROC & Cheap+PCA AUROC & Gain & Competent Cheap+PCA & Competent gain & Explained var. \\
+\midrule
+8 & 0.770 & 0.771 & 0.001 & 0.802 & 0.003 & 0.417 \\
+16 & 0.770 & 0.764 & -0.006 & 0.794 & -0.004 & 0.534 \\
+32 & 0.770 & 0.754 & -0.016 & 0.784 & -0.014 & 0.648 \\
+64 & 0.770 & 0.744 & -0.025 & 0.774 & -0.024 & 0.754 \\
+128 & 0.770 & 0.732 & -0.037 & 0.762 & -0.037 & 0.852 \\
+256 & 0.770 & 0.715 & -0.055 & 0.741 & -0.057 & 0.932 \\
+\bottomrule
+\end{tabular}
+}%
+
+\par\smallskip
+\begin{minipage}{0.96\linewidth}\footnotesize\textit{Note.} Increasing retained hidden variance does not reliably improve incremental utility, consistent with redundant or noisy high-dimensional signal.\end{minipage}
+\end{table}

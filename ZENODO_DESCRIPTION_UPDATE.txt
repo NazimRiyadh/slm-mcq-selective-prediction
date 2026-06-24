@@ -1,0 +1,3 @@
+Replace the outdated final sentence in the Zenodo description with:
+
+The feature archive is included in this record and enables the locked-validation analyses to be rerun without repeating model inference.

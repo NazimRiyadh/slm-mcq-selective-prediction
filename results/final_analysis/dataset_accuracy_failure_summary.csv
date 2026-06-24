@@ -1,0 +1,5 @@
+dataset,n_examples,base_accuracy_mean,base_accuracy_min,base_accuracy_max,test_failures_mean,test_failures_min,test_failures_max,n_condition_seed,n_lt10,n_lt20,dataset_label
+arc_challenge,299,0.8283166109253065,0.7357859531772575,0.919732441471572,10.333333333333334,5,16,30,10,30,ARC-Challenge
+commonsenseqa,1000,0.762,0.707,0.824,47.63333333333333,35,59,30,0,0,CommonsenseQA
+hellaswag,1000,0.7281666666666666,0.628,0.836,54.43333333333333,33,74,30,0,0,HellaSwag
+mmlu,1000,0.6293333333333333,0.549,0.727,74.3,54,90,30,0,0,MMLU

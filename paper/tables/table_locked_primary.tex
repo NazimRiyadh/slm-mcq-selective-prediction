@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Broad validation-locked results on the 24-condition MCQ suite. The compact baseline is output-only in eight Gemma/Llama conditions and includes three scalar layer-maximum summaries in sixteen other conditions; it is therefore not interpreted as a universal black-box baseline. Configuration is selected using validation data only. Values are equal-condition means with archived condition-bootstrap intervals in brackets; dependence-aware augmentation deltas are reported separately. Lower Risk@80\% and AURC are better.}
+\label{tab:locked-primary}
+\setlength{\tabcolsep}{4.5pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{lcccc}
+\toprule
+Selector & AUROC & AUPRC-fail & Risk@80\% & AURC \\
+\midrule
+Compact summary & \shortstack{0.799\\{\scriptsize [0.779, 0.818]}} & \shortstack{0.570\\{\scriptsize [0.545, 0.596]}} & \shortstack{0.190\\{\scriptsize [0.153, 0.228]}} & \shortstack{0.115\\{\scriptsize [0.092, 0.140]}} \\
+\shortstack[l]{Compact summary\\+ PCA hidden} & \shortstack{0.782\\{\scriptsize [0.765, 0.801]}} & \shortstack{0.558\\{\scriptsize [0.524, 0.588]}} & \shortstack{0.192\\{\scriptsize [0.156, 0.231]}} & \shortstack{0.120\\{\scriptsize [0.098, 0.143]}} \\
+PCA hidden only & \shortstack{0.707\\{\scriptsize [0.669, 0.742]}} & \shortstack{0.468\\{\scriptsize [0.412, 0.520]}} & \shortstack{0.213\\{\scriptsize [0.178, 0.248]}} & \shortstack{0.152\\{\scriptsize [0.126, 0.181]}} \\
+\bottomrule
+\end{tabular}
+\end{table}

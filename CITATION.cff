@@ -1,11 +1,38 @@
 cff-version: 1.2.0
-title: "When Do Hidden-State Probes Add Deployable Value? A Cost-Aware Locked Validation Study of Finite-Choice Small Language Models"
-message: "If you use this artifact, please cite the manuscript and the archived Zenodo release."
+message: "Please cite this repository, the associated Zenodo archive, and the journal article when available."
+title: "Cost-Aware Reliability Signal Selection for Finite-Choice Small Language Models: A Locked Validation Study"
 type: software
+version: 1.0.2
+date-released: 2026-06-24
 authors:
   - family-names: "Alam"
     given-names: "Nazim-E"
-year: 2026
+  - family-names: "Al Farid"
+    given-names: "Fahmid"
+  - family-names: "Islam"
+    given-names: "Syeda Asrafa"
+  - family-names: "Al-Jubair"
+    given-names: "Abdullah"
+  - family-names: "Rahman"
+    given-names: "Shakila"
+  - family-names: "Mridha"
+    given-names: "M. F."
+  - family-names: "Uddin"
+    given-names: "Jia"
+  - family-names: "Karim"
+    given-names: "Hezerul Abdul"
+repository-code: "https://github.com/NazimRiyadh/slm-mcq-selective-prediction"
+url: "https://doi.org/10.5281/zenodo.20732805"
+doi: "10.5281/zenodo.20732805"
 license: MIT
-repository-code: "https://github.com/REPLACE-WITH-FINAL-REPOSITORY"
-abstract: "Code, locked validation outputs, and manuscript artifacts for a cost-aware locked validation audit of hidden-state probes for finite-choice SLM selective prediction."
+keywords:
+  - selective prediction
+  - small language models
+  - uncertainty estimation
+  - abstention
+  - hidden-state probing
+  - finite-choice classification
+abstract: >-
+  Code, processed outputs, manuscript artifacts, and reproducibility
+  documentation for a validation-locked evaluation of reliability-signal
+  selection in finite-choice small language models.

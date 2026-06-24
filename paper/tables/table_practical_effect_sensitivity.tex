@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Post hoc practical-effect sensitivity across 24 seed-averaged model--dataset conditions. Thresholds are interpretive, not preregistered equivalence margins: +0.01 AUROC/AUPRC, -0.01 Risk@80\% (eight fewer retained errors per 1000 queries at 80\% coverage), and -0.005 AURC.}
+\label{tab:practical-effect}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+Metric & Mean $\Delta$ & Beneficial threshold & Any benefit & Meets threshold \\
+\midrule
+AUROC & -0.0169 & +0.010 & 12/24 & 1/24 \\
+AUPRC-fail & -0.0124 & +0.010 & 8/24 & 5/24 \\
+Risk@80\% & +0.0017 & -0.010 & 9/24 & 3/24 \\
+AURC & +0.0046 & -0.005 & 11/24 & 5/24 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

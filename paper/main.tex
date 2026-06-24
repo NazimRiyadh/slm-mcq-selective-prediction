@@ -1,0 +1,399 @@
+%% Submission-ready Elsevier manuscript for Machine Learning with Applications.
+\documentclass[preprint,12pt,authoryear]{elsarticle}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{adjustbox}
+\usepackage{threeparttable}
+\usepackage{placeins}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}}
+\emergencystretch=3em
+
+\journal{Machine Learning with Applications}
+
+\begin{document}
+\begin{frontmatter}
+
+\title{Cost-Aware Reliability Signal Selection for Finite-Choice Small Language Models: A Locked Validation Study}
+
+\author[aff1]{Nazim-E-Alam} 
+\ead{22-47047-1@student.aiub.edu} 
+\author[aff3,aff4]{Fahmid Al Farid} 
+\ead{fahmid.farid@mmu.edu.my} 
+\author[aff1]{Syeda Asrafa Islam\corref{cor1}} 
+\ead{syeda.asrafa@aiub.edu} 
+\author[aff1]{Abdullah-Al-Jubair} 
+\ead{abdullah@aiub.edu} 
+\author[aff1]{Shakila Rahman} 
+\ead{Shakila.Rahman@aiub.edu} 
+\author[aff1]{M. F. Mridha} 
+\ead{firoz.mridha@aiub.edu} 
+\author[aff5]{Jia Uddin} 
+\ead{jia.uddin@wsu.ac.kr} 
+\author[aff2]{Hezerul Abdul Karim\corref{cor2}} 
+\ead{hezerul@mmu.edu.my} 
+\cortext[cor1]{Corresponding author} 
+\cortext[cor2]{Co-corresponding author}
+
+\affiliation[aff1]{organization={Department of Computer Science, American International University-Bangladesh (AIUB)}, city={Dhaka}, country={Bangladesh}}
+\affiliation[aff2]{organization={Program of Data Science and Analytics, Department of Mathematical and Physical Sciences, East West University}, city={Dhaka}, postcode={1212}, country={Bangladesh}}
+\affiliation[aff3]{organization={Centre for Image and Vision Computing (CIVC), Centre of Excellence for Artificial Intelligence, Faculty of Artificial Intelligence and Engineering (FAIE), Multimedia University}, city={Cyberjaya}, postcode={63100}, state={Selangor}, country={Malaysia}}
+\affiliation[aff4]{organization={Berlin School of Business \& Innovation (BSBI)}, country={Germany}}
+\affiliation[aff5]{organization={AI and Big Data Department, Woosong University}, city={Daejeon}, postcode={34606}, country={Republic of Korea}}
+
+\begin{abstract}
+Selective prediction lets a language model abstain when its finite-choice answer is likely to be wrong, but candidate reliability signals differ substantially in acquisition and maintenance cost. We evaluate whether PCA-compressed full hidden vectors improve selective prediction beyond lower-cost reliability summaries under validation-locked model selection. The primary study spans 24 model--dataset conditions formed by six instruction-tuned 7B/9B-class models and four MCQ benchmarks, with five repeated stratified splits per condition. An artifact audit identified two lower-dimensional schemas: a 24-condition compact-summary baseline and, within it, an eight-condition subset with strictly output-only features. Across the broad suite, compact summaries achieved 0.799 AUROC, 0.570 failure-detection AUPRC, 0.190 Risk@80\%, and 0.115 AURC, whereas full-vector augmentation achieved 0.782, 0.558, 0.192, and 0.120. The augmentation-minus-baseline AUROC difference was $-0.0169$ (95\% two-way model/dataset cluster interval $[-0.0567,0.0059]$). In the strict output-only subset, output features achieved 0.819 AUROC and 0.094 AURC, versus 0.771 and 0.117 after augmentation; the AUROC difference was $-0.0474$ with interval $[-0.1201,-0.0073]$. Alternative validation objectives, equal search budgets, and leave-one-model/dataset-out analyses preserved the overall ordering, while auxiliary finite-choice tasks showed mixed, task-dependent gains. Full hidden vectors therefore did not deliver a stable average operating advantage in the tested settings. For deployment, we recommend starting with the lowest-cost admissible signal family and adding full hidden-state probes only when target-domain validation demonstrates a prespecified, practically meaningful benefit.
+\end{abstract}
+
+\begin{keyword}
+small language models \sep selective prediction \sep abstention \sep uncertainty estimation \sep hidden-state probing \sep cost-aware machine learning \sep finite-choice classification
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+Small language models (SLMs) offer an attractive balance between capability and deployment cost, especially where memory, latency, privacy, or infrastructure constraints limit the use of frontier-scale systems. Yet a lower-cost model is useful only if its mistakes can be managed. In many applications, the relevant decision is therefore not only which answer a model produces, but whether the system should answer at all. Selective prediction formalizes this choice by allowing a model to abstain on examples with high predicted risk, trading coverage for lower error among retained predictions \citep{geifman2017selective,geifman2019selectivenet}.
+
+Reliability signals occupy different operational tiers. Output probabilities, margins, entropy, and per-option scores can be obtained from the same forced-choice scoring pass. Compact internal summaries require white-box access but retain only a few scalar diagnostics. Full hidden-vector probes additionally require activation extraction, storage, dimensionality reduction, probe fitting, and target-distribution validation \citep{chen2024inside,ji2024internal,orgad2024llms}. Sampling-based methods avoid activation handling but require repeated inference \citep{manakul2023selfcheckgpt,farquhar2024semanticentropy}. The deployment question is therefore not simply whether a signal correlates with correctness; it is whether a richer signal improves operating risk enough to justify its incremental acquisition and maintenance burden.
+
+We study this question in answerable finite-choice tasks. Multiple-choice question answering (MCQ) provides automatic correctness labels, explicit candidate options, and direct risk--coverage evaluation without human or LLM-as-judge scoring. The same decision interface appears in label selection, intent routing, action choice, risk categorization, and candidate-response selection. Finite-choice evaluation does not exhaust the challenges of unrestricted generation, but it provides a controlled setting in which incremental reliability value can be isolated and measured precisely.
+
+The central gap is not whether hidden states encode correctness-related information, but whether high-dimensional internal representations provide stable incremental gains over lower-dimensional summaries under validation-locked model selection, dependence-aware inference, and deployment-oriented metrics. This question also requires precise feature provenance. An artifact audit showed that the archived family originally labeled \texttt{confidence\_option} is strictly output-only for Gemma-2 and Llama-3.1, but includes three scalar layer-maximum summaries for Falcon3, Mistral, OLMo, and Qwen. We therefore report a broad 24-condition compact-summary comparison and a separate strict output-only sensitivity on the eight Gemma/Llama conditions.
+
+The primary evaluation comprises six instruction-tuned 7B/9B-class models, four MCQ benchmarks, and five repeated stratified splits per condition. Auxiliary AG News, TREC, DBPedia, and Banking77 experiments test whether conclusions are specific to MCQ-style tasks. We report correctness AUROC, failure-detection AUPRC, fixed-coverage risk, AURC, E-AURC, failure capture, crossed model/dataset intervals, leave-one-cluster-out sensitivity, failure prevalence, validation-search sensitivity, and operational diagnostics. Code, processed outputs, exact feature-schema audits, and per-example archives accompany the study.
+
+The study addresses four research questions:
+\begin{description}
+    \item[RQ1.] How strong are compact reliability summaries, and how strong are strictly output-only features where that schema is available?
+    \item[RQ2.] Do PCA-compressed full hidden vectors add incremental value beyond those baselines?
+    \item[RQ3.] Are any incremental gains stable across models, datasets, layer choices, PCA dimensions, probe strength, and sample size?
+    \item[RQ4.] Are richer signal families justified after white-box access, activation handling, storage, fitting, and validation burden are considered?
+\end{description}
+
+The main contributions are as follows:
+\begin{enumerate}
+    \item We formulate finite-choice reliability estimation as an incremental signal-selection problem across output-only, compact internal-summary, and full hidden-vector tiers.
+    \item We conduct a transparent feature-schema audit, distinguish the broad 24-condition compact-summary analysis from an eight-condition strict output-only sensitivity, and preserve the archived family labels in the released machine-readable outputs.
+    \item We establish a validation-locked evaluation across six instruction-tuned models and four MCQ benchmarks, with auxiliary evaluation on four non-MCQ finite-choice datasets.
+    \item We evaluate operating value using selective-risk metrics, failure prevalence, crossed model/dataset sensitivity, alternative selection objectives, equal search budgets, and latency, memory, storage, and fitting diagnostics.
+    \item We derive a staged deployment rule: begin with the lowest-cost signal family compatible with the system interface and add full hidden-vector probes only when target-domain validation demonstrates stable, practically meaningful gains.
+\end{enumerate}
+
+\section{Related work}
+\subsection{Selective prediction, calibration, and abstention}
+Selective classification evaluates predictors that may reject uncertain cases rather than produce a decision on every input. Confidence thresholding remains a strong baseline, while approaches such as SelectiveNet learn a selection function jointly with prediction \citep{geifman2017selective,geifman2019selectivenet}. Maximum softmax probability is also a competitive error-detection baseline, although modern neural networks can be miscalibrated even when their ranking performance is strong \citep{hendrycks2017baseline,guo2017calibration}. Recent language-model work extends abstention to unanswerability, false premises, ambiguity, stale knowledge, and explicit self-evaluation \citep{wen2025limits,kirichenko2025abstentionbench,kadavath2022lmknow}. We focus on answerable questions, where abstention targets prediction failure rather than unanswerability.
+
+\subsection{Sampling and semantic uncertainty}
+Repeated generation can expose uncertainty through answer disagreement, self-consistency, or semantic entropy. SelfCheckGPT compares sampled responses, semantic entropy clusters meaning-equivalent generations, and self-consistency aggregates multiple reasoning paths \citep{manakul2023selfcheckgpt,farquhar2024semanticentropy,wang2023selfconsistency}. These methods are valuable for open-ended generation but multiply inference cost. We include five-sample agreement as a repeated-inference cost benchmark; semantic clustering is outside the present protocol.
+
+\subsection{Hidden-state reliability signals}
+Internal language-model representations can encode truthfulness, hallucination, or correctness information that is not fully visible in the output text \citep{chen2024inside,ji2024internal,orgad2024llms}. However, hidden-only predictiveness does not establish deployment value. A hidden feature can be informative in isolation while being redundant once confidence, margin, entropy, and per-option scores are included. Our analysis focuses on this residual question and separates a diagnostic best-probe envelope from validation-locked held-out performance. Recent MCQ-focused uncertainty benchmarking further motivates reporting failure prevalence and multiple selective-prediction metrics rather than a single discrimination score \citep{wang2025ubench}.
+
+\subsection{Positioning of this study}
+The methodological contribution is an evaluation framework that jointly treats incremental value, feature-schema provenance, selection bias, selective-risk metrics, failure prevalence, crossed dependence, and acquisition cost. Rather than introducing another representation learner, the study determines when full hidden-vector handling is justified relative to lower-dimensional baselines in a reproducible finite-choice setting.
+
+\section{Problem formulation}
+Let $x$ denote a prompt and $A=\{a_1,\ldots,a_K\}$ its candidate options. A language model assigns a score $s(x,a_k)$ to each option and predicts
+\begin{equation}
+\hat{y}=\arg\max_{a_k\in A} s(x,a_k).
+\end{equation}
+Given ground-truth answer $y$, correctness and failure are
+\begin{equation}
+c=\mathbb{1}[\hat{y}=y], \qquad f=1-c.
+\end{equation}
+A reliability model receives a feature vector $z$ and estimates $r=P(c=1\mid z)$. For a numerical threshold $\tau$, a selective policy answers when $r\geq\tau$. Coverage and selective risk are
+\begin{equation}
+\mathrm{coverage}(\tau)=\frac{1}{n}\sum_{i=1}^{n}\mathbb{1}[r_i\geq\tau],
+\end{equation}
+\begin{equation}
+\mathrm{risk}(\tau)=\frac{\sum_i \mathbb{1}[r_i\geq\tau]\mathbb{1}[\hat{y}_i\neq y_i]}{\sum_i \mathbb{1}[r_i\geq\tau]}.
+\end{equation}
+
+Risk at a fixed coverage $q$ is computed as a ranking metric: test examples are ordered by $r_i$, the highest-ranked fraction $q$ is retained, and the error rate within that subset is reported. This permits fair comparison at a common coverage level but is not equivalent to calibrating a numerical threshold on validation data and transferring it unchanged to deployment. A deployed system would require separate threshold calibration, and realized production coverage could differ from the nominal target.
+
+We report AUROC for correctness ranking, AUPRC with failures as the positive class, risk at fixed coverage, area under the risk--coverage curve (AURC), excess AURC (E-AURC), and failure recall at fixed abstention. Because AUPRC depends on failure prevalence, it is interpreted jointly with failure counts and prevalence-sensitive uncertainty analyses.
+
+\section{Experimental design}
+\subsection{Models, datasets, and sampling}
+A motivating sub-2B study uses Qwen2.5-0.5B-Instruct, Qwen2.5-1.5B-Instruct, and TinyLlama-1.1B-Chat across ARC-Challenge, ARC-Easy, OpenBookQA, CommonsenseQA, BoolQ, HellaSwag, and MMLU \citep{clark2018arc,mihaylov2018openbookqa,talmor2019commonsenseqa,clark2019boolq,zellers2019hellaswag,hendrycks2021mmlu,yang2024qwen,zhang2024tinyllama}. The primary analysis uses Qwen2.5-7B-Instruct, Mistral-7B-Instruct-v0.3, Falcon3-7B-Instruct, OLMo-2-1124-7B-Instruct, Gemma-2-9B-IT, and Llama-3.1-8B-Instruct \citep{yang2024qwen,jiang2023mistral,falcon3modelcard,olmo22025,gemmateam2024gemma2,dubey2024llama3}. The four primary datasets are ARC-Challenge, CommonsenseQA, HellaSwag, and the aggregate MMLU condition. ARC-Challenge contributes 299 examples and each remaining primary dataset contributes 1000 examples per model. The same archived dataset pool is used across the six primary models; the five seeds alter only the stratified train/validation/test partition.
+
+The auxiliary finite-choice block includes AG News (four labels), TREC question classification (six labels), DBPedia ontology classification (14 labels), and Banking77 intent classification (77 labels) \citep{zhang2015character,li2002trec,lehmann2015dbpedia,casanueva2020banking77}. AG News, TREC, and DBPedia are evaluated with Qwen2.5-7B, Llama-3.1-8B-Instruct, and Mistral-7B-Instruct-v0.3; Banking77 is evaluated with Qwen2.5-7B as a high-cardinality stress check. The public artifact records the dataset identifiers, configurations, example identifiers, prompt templates, checkpoint identifiers, and split seeds used by each extractor. Detailed auxiliary sampling rules and the exact protocol fields are reproduced in the Supplementary Material.
+
+Table~\ref{tab:dataset-failure-summary} reports primary answer accuracy and held-out failure prevalence. ARC-Challenge is the most failure-sparse setting: 10 of its 30 model--seed test splits contain fewer than 10 failures and all contain fewer than 20. AUPRC and fixed-coverage risk are therefore interpreted together with failure counts rather than as prevalence-free quantities.
+
+\input{tables/table_dataset_failure_summary.tex}
+\FloatBarrier
+
+DeepSeek-R1-Distill-Qwen-7B is retained as a forced-choice protocol stress test \citep{deepseek2025r1}. Under direct answer-letter likelihood scoring, its base accuracies are 0.324 on ARC-Challenge, 0.223 on CommonsenseQA, 0.258 on HellaSwag, and 0.291 on MMLU, only 0.008--0.074 above the task-specific chance rates. The decision to separate this checkpoint was made after this interface audit and is therefore reported transparently as post hoc rather than as a prespecified exclusion. Its complete reliability results remain in the Supplementary Material.
+
+\subsection{Reliability signals and feature-schema audit}
+We compare output-only, compact-summary, and full hidden-vector signal tiers. Direct confidence is the maximum normalized option probability. Output-score features include top probabilities, probability and logit margins, entropy, available per-option probability/logit columns, and the number of candidate options. PCA-hidden features use archived per-example hidden vectors compressed by train-fitted principal component analysis \citep{jolliffe2002pca}; hidden-only and combined selectors use those vectors without and with the lower-dimensional baseline, respectively. Diagnostic analyses additionally consider scalar hidden summaries, layer-localized probes, and a supervised contrastive probe on Gemma and Llama. A five-sample agreement baseline is retained as a high-cost diagnostic because it changes the inference budget.
+
+A reproducibility audit of the archived selected-result tables identified a schema distinction that is material to interpretation. In the eight Gemma-2/Llama-3.1 MCQ conditions, the archived family labeled \texttt{confidence\_option} contains only \texttt{top\_prob}, \texttt{margin}, \texttt{entropy}, and, for ARC, \texttt{n\_options}. In the sixteen Falcon3/Mistral/OLMo/Qwen conditions, the same archived family also contains three scalar columns named \texttt{early\_layer*\_max}, \texttt{late\_layer*\_max}, and \texttt{final\_layer*\_max}. Because those columns are internal summaries rather than output-only evidence, we call this family the \emph{compact-summary baseline} in the broad analysis. The strict output-only sensitivity is restricted to the eight conditions whose archived columns contain no layer, hidden, activation, or embedding marker. Table~\ref{tab:feature-schema-audit} records the distinction; the full column manifest is provided in the Supplementary Material.
+
+\input{tables/table_feature_schema_audit.tex}
+\FloatBarrier
+
+\subsection{Validation-locked model selection and dependence-aware inference}
+For each model--dataset--seed condition, examples are stratified by correctness into 60\% training, 20\% validation, and 20\% held-out test partitions. Standardization and PCA are fitted on the training split only. Candidate configurations within each feature family are selected using validation AUROC as the common threshold-independent criterion; selected components include PCA dimension and logistic regularization. AUPRC, Risk@80\%, AURC, E-AURC, and failure-capture metrics are evaluated on the protected test split and are not used for primary configuration selection.
+
+The five seeds are repeated partitions of the same examples, not independent replications. We therefore first average the five seeds within each of the 24 model--dataset conditions. Equal-condition macro averages are the primary descriptive estimand. For uncertainty, a two-way cluster bootstrap independently resamples the six model clusters and four dataset clusters for 50,000 replicates and recomputes the mean full-vector-augmentation-minus-compact effect. Leave-one-dataset-out and leave-one-model-out analyses assess sensitivity to individual clusters. The earlier condition-only hierarchical bootstrap and seed-level paired tests are retained as secondary analyses in the Supplementary Material.
+
+The full-vector combined family has a larger validation search grid than the compact baseline. We address this concern with three sensitivity re-analyses of the archived candidates: selection by validation AURC, selection by validation Risk@80\%, and an equal-budget analysis that fixes PCA dimension at 32 so that each compared family has three regularization candidates. We also report validation-to-test AUROC degradation by feature family.
+
+No equivalence margin was preregistered. We therefore avoid equivalence claims. As a post hoc interpretive sensitivity only, we count conditions meeting practical thresholds of +0.01 AUROC or AUPRC, $-0.01$ Risk@80\% (eight fewer retained errors per 1000 queries at 80\% coverage), or $-0.005$ AURC.
+
+Figure~\ref{fig:pipeline} summarizes the validation-locked workflow and the separation between signal acquisition, model selection, protected test evaluation, and the final d eployment rule.
+
+\input{tables/table_locked_protocol.tex}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=1.0\linewidth]{figures/fig_pipeline.pdf}
+    \caption{Validation-locked reliability signal selection across output-only, compact internal-summary, and full-vector tiers. Held-out correctness labels are not used for fitting or configuration selection; they are used only for final evaluation after the selector is fixed.}
+    \label{fig:pipeline}
+\end{figure}
+\FloatBarrier
+
+\section{Results}
+\subsection{Broad compact-summary analysis}
+Table~\ref{tab:locked-primary} reports equal-condition macro averages across the 24 MCQ model--dataset conditions. The compact-summary baseline achieves 0.799 AUROC, 0.570 failure-detection AUPRC, 0.190 Risk@80\%, and 0.115 AURC. Adding PCA-compressed hidden vectors yields 0.782, 0.558, 0.192, and 0.120, respectively; hidden-only PCA features are weaker on all four metrics. These values quantify incremental full-vector utility beyond the archived compact baseline. They are not a pure black-box-output comparison because sixteen conditions include three scalar layer-maximum summaries in that baseline.
+
+\input{tables/table_locked_primary.tex}
+
+After averaging seeds within condition, the augmentation-minus-compact mean differences are $-0.0169$ AUROC, $-0.0124$ AUPRC, $+0.0017$ Risk@80\%, and $+0.0046$ AURC. The two-way model/dataset cluster interval includes zero for every metric, including AUROC ($[-0.0567,0.0059]$), whereas every leave-one-dataset-out and leave-one-model-out AUROC estimate remains negative. Thus, full-vector augmentation did not deliver a stable average improvement over the compact baseline in the broad suite. This result concerns incremental operating value, not whether hidden states contain correctness-related information.
+
+\input{tables/table_crossed_dependence.tex}
+
+Figure~\ref{fig:condition-heatmap} shows substantial condition-level heterogeneity. Positive AUROC deltas occur in some conditions, but gains do not concentrate consistently by model or benchmark.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.90\linewidth]{fig_condition_auroc_delta_heatmap.pdf}
+    \caption{Seed-averaged AUROC difference (compact summary + PCA hidden minus compact summary) for each primary model--dataset condition. Positive cells favor full-vector augmentation; color intensity shows the descriptive magnitude of the condition-level effect.}
+    \label{fig:condition-heatmap}
+\end{figure}
+
+Equal-condition and test-size-weighted summaries give the same broad ordering (Table~\ref{tab:macro-weighted}). The weighted values reduce the influence of smaller ARC-Challenge test sets but are not pooled independent-query AUROC/AUPRC estimates because repeated test splits overlap. At 80\% coverage, the macro risks correspond to approximately 151.9 and 153.3 retained errors per 1000 queries for the compact and augmented selectors. These are illustrative average-condition quantities, not observed pooled counts or validation-calibrated production thresholds.
+
+\input{tables/table_macro_weighted.tex}
+
+\subsection{Strict output-only sensitivity}\label{sec:strict-output}
+The eight Gemma-2/Llama-3.1 conditions provide a clean test of output scores versus full hidden-vector augmentation. Output-only features achieve 0.819 AUROC, 0.567 failure-detection AUPRC, 0.167 Risk@80\%, and 0.094 AURC; augmentation yields 0.771, 0.553, 0.170, and 0.117. The augmentation-minus-output AUROC difference is $-0.0474$ with a two-way model/dataset bootstrap interval of $[-0.1201,-0.0073]$; the AURC difference is $+0.0226$ with an interval of $[0.0100,0.0389]$. AUPRC, fixed-coverage risk, and failure-recall intervals are wider. This strict sensitivity reinforces the broad result for Gemma-2 and Llama-3.1, while its two-model scope defines the appropriate boundary of the output-only claim.
+
+\input{tables/table_strict_output_subset.tex}
+
+\subsection{Selection-objective and search-budget sensitivity}
+The broad numerical ordering is unchanged when candidate configurations are selected by validation AURC or validation Risk@80\%, and it is not reversed when the combined family is restricted to the same number of regularization candidates as the compact family. Validation-to-test AUROC degradation is larger for richer families: $-0.0083$ for the archived compact baseline, $-0.0133$ for the combined family, and $-0.0205$ for hidden-only features. This pattern supports validation locking and cautions against interpreting a diagnostic best-probe envelope as deployable performance. Complete selection-frequency, validation-gap, and equal-budget results are provided in the Supplementary Material.
+
+\subsection{Auxiliary non-MCQ finite-choice results}
+The auxiliary experiments reveal task-dependent opportunities for hidden-state augmentation. Across the nine AG News, TREC, and DBPedia conditions, augmentation improves mean AUROC from 0.857 to 0.866 and failure-detection AUPRC from 0.653 to 0.680, while reducing mean Risk@80\% from 0.154 to 0.151 and AURC from 0.096 to 0.093. Condition-cluster intervals include zero for all four mean differences, and several Llama and Qwen conditions favor the lower-dimensional selector. Banking77 shows larger point improvements in some metrics but comprises one small high-cardinality condition. Taken together, the auxiliary results show that the value of richer internal features depends on the target task and operating point.
+
+\input{tables/table_nonmcq_summary.tex}
+\FloatBarrier
+
+\subsection{Sensitivity and diagnostic analyses}
+The diagnostic best-probe envelope confirms that internal representations contain correctness-related information under favorable probe selection. Layer localization shows stronger hidden-only signal in later layers; increasing PCA dimensionality does not consistently increase incremental utility; and a supervised contrastive probe on Gemma and Llama does not reverse the output-only sensitivity. Low-failure and sample-size analyses show wider instability when held-out failures are sparse. DeepSeek results are reported as a post hoc interface stress test, not pooled evidence: its direct option-scoring accuracy remains near chance under the tested answer-letter protocol. Detailed per-condition, layer, PCA, contrastive, low-failure, practical-effect, and DeepSeek results appear in the Supplementary Material.
+
+\subsection{Operational cost tiers}
+The cost interpretation follows the actual feature schemas. Strict output-only scores require no activation retention. Compact layer-scalar summaries require white-box access and extraction hooks but retain only three internal scalars per example. Full-vector PCA probes additionally require high-dimensional activation storage, train-fitted preprocessing, a larger validation grid, and revalidation after model or distribution changes. Five-sample agreement remains black-box compatible but requires repeated inference. Table~\ref{tab:operational-cost-quantification} separates these tiers rather than attributing a single cost profile to the heterogeneous compact baseline.
+
+\input{tables/table_operational_cost_quantification.tex}
+\FloatBarrier
+
+\section{Discussion}
+\subsection{Full-vector augmentation is largely redundant in the primary setting}
+Across the primary 24-condition evaluation, full PCA-compressed hidden vectors did not improve average selective-prediction performance beyond the archived compact summaries. This ordering persists across alternative validation objectives, equalized search budgets, leave-one-model-out and leave-one-dataset-out analyses, and test-size weighting. The strict output-only Gemma/Llama sensitivity reaches the same directional conclusion for AUROC and AURC. At the same time, hidden-only, layer-localized, and diagnostic analyses confirm that internal representations contain correctness-related structure. The key distinction is therefore between information content and incremental operating value.
+
+\subsection{Why lower-dimensional signals can be sufficient}
+Finite-choice output distributions directly encode preference strength, margin, and dispersion around the selected answer. These quantities are closely aligned with the decision boundary used to choose among explicit candidates, so full hidden vectors may contribute information that is largely redundant for correctness ranking. Richer families also show greater validation-to-test degradation, consistent with increased selection variance under limited calibration data. This interpretation is not universal: the auxiliary results identify settings in which hidden augmentation provides positive point gains, indicating that redundancy depends on the task, model, and scoring interface.
+
+\subsection{Implications for finite-choice deployment}
+The results support a staged policy based on the deployment interface. First, establish an output-only selector from probabilities, margins, entropy, and option scores. If white-box access is already available, compact internal scalars can be evaluated as an intermediate tier before retaining full vectors. Full hidden-state probes are justified when locked target-domain validation shows a stable reduction in operating risk that exceeds the added costs of activation extraction, storage, fitting, labeling, monitoring, and maintenance. Application-specific thresholds should be prespecified in units such as avoided retained errors per 1000 answered queries or a minimum AURC reduction rather than inferred retrospectively from AUROC alone.
+
+\begin{center}
+\fbox{\begin{minipage}{0.93\linewidth}
+\small
+\textbf{Practical signal-selection rule.} Begin with the lowest-cost admissible signal family: output scores for black-box or logit-access deployments, compact internal summaries when white-box hooks already exist, and full hidden vectors only when locked target-domain validation demonstrates a stable, practically meaningful operating gain.
+\end{minipage}}
+\end{center}
+
+\subsection{Operational interpretation of cost awareness}
+In this study, \emph{cost-aware} means evaluating predictive benefit alongside documented acquisition and maintenance burdens. The framework does not impose a universal monetary objective; organizations can substitute their own hardware profile, service-level constraints, retention policies, escalation costs, and acceptable error rates. This makes the empirical comparison actionable without treating one operational cost function as valid for every deployment.
+
+\section{Limitations and threats to validity}
+First, the evidence concerns target-calibrated, answerable finite-choice tasks. The auxiliary datasets broaden the interface beyond MCQ, but the results do not directly characterize unrestricted generation, retrieval-augmented faithfulness, agentic planning, false-premise abstention, cross-model transfer, temporal drift, or distribution shift.
+
+Second, feature and probe scope matters. Sixteen broad-analysis conditions include three scalar layer-maximum summaries in the compact family, whereas the strict output-only sensitivity covers Gemma-2 and Llama-3.1. Prompt wording, option order, chat templates, tokenization, and length normalization were held fixed rather than exhaustively varied. The conclusions apply to the tested summary, PCA, layer-localized, logistic, and contrastive probes; other representation methods may behave differently.
+
+Third, statistical precision is constrained by the available clusters and failures. The five seeds are overlapping resplits, so inference averages within condition and resamples model and dataset clusters. With six models, four datasets, and sparse ARC-Challenge failures, some intervals remain wide. AUPRC is prevalence-sensitive, Risk@80\% is a fixed-coverage ranking metric rather than a transferred deployment threshold, and the post hoc practical-effect counts do not establish equivalence.
+
+Finally, implementation and cost estimates are context dependent. The richer family has a larger default search grid, although alternate-objective, equal-budget, and validation-gap analyses preserve the main ordering. Latency and memory depend on hardware, sequence length, batching, software, and precision. Common benchmarks may also have appeared in model pretraining. These constraints motivate replication on additional datasets, interfaces, and deployment stacks rather than weakening the internal comparison reported here.
+
+\section{Implementation details}
+All tasks are converted to a finite-choice scoring interface. For MCQ datasets, the prompt contains the question and labeled answer options; for AG News, TREC, DBPedia, and Banking77, the candidates are topic, question-type, ontology, or intent labels. Each candidate is scored under the same context. For a candidate string $a_k$ with tokens $t_1,\ldots,t_m$, the score is the mean token log likelihood
+\begin{equation}
+S_k=\frac{1}{m}\sum_{j=1}^{m}\log p_\theta(t_j\mid x,A,t_{<j}),
+\end{equation}
+and the highest-scoring candidate is selected. AUROC treats correctness as positive; failure-detection AUPRC ranks $1-r$ with failure as positive.
+
+The archived locked evaluator uses a schema-driven numeric-column selector. Its machine-readable family name \texttt{confidence\_option} is retained for reproducibility, but the manuscript distinguishes two cases. The strict output-only Gemma/Llama conditions use \texttt{top\_prob}, \texttt{margin}, \texttt{entropy}, and, for ARC, \texttt{n\_options}. The other sixteen MCQ conditions use output probabilities/logits and margins together with scalar columns named \texttt{early\_layer*\_max}, \texttt{late\_layer*\_max}, and \texttt{final\_layer*\_max}. The full schema manifest and an audit script are released with the supplement. No layer-marked column is treated as output-only in the manuscript interpretation.
+
+The public auxiliary extractor applies the model's chat template when available, scores answer-letter completions, uses maximum sequence length 768 and option batch size four, and defaults to 4-bit NF4 weights with double quantization and FP16 computation. Its hidden vector is the final non-padding prompt token from the final transformer layer, extracted before candidate completion scoring. Primary locked analyses consume the archived per-example hidden matrix rather than selecting token positions on the test set: a two-dimensional archived matrix is used directly, while a three-dimensional layer stack is reduced to its final stored layer by the validator. Diagnostic layer-localization experiments are analyzed separately.
+
+For PCA selectors, the hidden matrix is standardized using training data and PCA is fitted on the training split only. Validation and test examples use the train-fitted scaler and basis. The full search uses PCA dimensions $\{16,32,64\}$ and logistic regularization $C\in\{0.1,1,10\}$. Logistic regression uses the liblinear solver, balanced class weights, and a maximum of 1000 iterations. The equal-budget sensitivity fixes PCA dimension at 32. PyTorch and Transformers are used for model inference, and scikit-learn is used for preprocessing, probes, and metrics \citep{pedregosa2011sklearn,paszke2019pytorch,wolf2020transformers}.
+
+The locked evaluator uses seeds $\{0,1,2,3,4\}$. Standardization, PCA, and reliability-model selection are fitted without test access. The Supplementary Material records dataset source/configuration, sample size, prompt construction, checkpoint name, feature columns, quantization settings, and archived representation. Systematic option-order and prompt-template variation remain priorities for future robustness analysis.
+
+\section{Reproducibility}
+\input{tables/table_reproducibility.tex}
+\FloatBarrier
+The public repository contains extraction and locked-validation code, processed outputs, figure-generation materials, environment metadata, and manuscript sources. The Zenodo record archives the per-example option-score features, hidden-state arrays, metadata files, and locked-validation outputs needed to rerun the main analysis without repeating model inference \citep{nazim2026artifact}. Model weights are not redistributed; gated checkpoints remain subject to the original providers' access conditions.
+
+\FloatBarrier
+\section{Conclusion}
+This study examined whether full hidden-vector probes improve selective prediction beyond lower-dimensional reliability summaries in finite-choice SLMs. Across the primary 24-condition MCQ suite, PCA-hidden augmentation did not improve the equal-condition or test-size-weighted averages, and the same ordering persisted under crossed-dependence, alternative-selection, and equal-search-budget analyses. The strict output-only Gemma/Llama sensitivity also favored output features on AUROC and AURC, while auxiliary tasks revealed condition-specific exceptions. Together, these results support a staged deployment policy: start with the lowest-cost signal family compatible with the system interface, and adopt full hidden vectors only when target-domain validation demonstrates a prespecified, practically meaningful gain. The conclusion is specific to the evaluated finite-choice tasks and probe families and does not imply that hidden representations are generally uninformative.
+
+\FloatBarrier
+\section*{CRediT authorship contribution statement}
+Nazim-E-Alam: Conceptualization, Methodology, Software, Validation, Formal analysis, Investigation, Data curation, Visualization, Writing -- original draft, Writing -- review and editing. Fahmid Al Farid: Methodology, Validation, Formal analysis, Investigation, Writing -- review and editing. Syeda Asrafa Islam: Supervision, Methodology, Validation, Writing -- review and editing. Abdullah-Al-Jubair: Methodology, Validation, Formal analysis, Writing -- review and editing. Shakila Rahman: Supervision, Resources, Writing -- review and editing. M.F. Mridha: Supervision, Project administration, Resources, Writing -- review and editing. Jia Uddin: Supervision, Project administration, Resources, Writing -- review and editing. Hezerul Abdul Karim: Supervision, Methodology, Validation, Project administration, Writing -- review and editing.
+
+\section*{Declaration of competing interest}
+The authors declare no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Funding}
+This work was supported by Multimedia University, Cyberjaya, Selangor, Malaysia [Grant No. PostDoc(MMUI/240029)]. The funder had no role in the study design; data collection, analysis, or interpretation; preparation of the manuscript; or the decision to submit the article for publication.
+
+\section*{Acknowledgements}
+The authors thank the open-source model, dataset, and software communities for enabling reproducible small-language-model reliability research.
+
+\section*{Data and code availability}
+The experiments use publicly available model checkpoints and benchmark datasets. Code and reproducibility materials are provided in the project repository at \url{https://github.com/NazimRiyadh/slm-mcq-selective-prediction} and archived on Zenodo at \url{https://doi.org/10.5281/zenodo.20732806}. The archive includes extraction and validation-locked analysis scripts, processed result tables, figures, environment documentation, and \texttt{features\_combined\_q1\_broad\_nonmcq.zip}, which contains per-example option-score CSV files, hidden-state NPZ arrays, and metadata JSON files. These materials permit the locked analysis to be rerun without repeating model inference. Model weights are not redistributed; gated checkpoints remain subject to the original providers' access conditions.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the writing process}
+During the preparation of this work, the authors used ChatGPT by OpenAI to assist with language refinement, structural organization, and formatting. After using this tool, the authors reviewed and edited the content as needed, verified the reported numerical results against the archived experiment outputs, and take full responsibility for the content of the publication.
+
+\begin{thebibliography}{99}
+
+\bibitem[Casanueva et~al.(2020)]{casanueva2020banking77}
+Casanueva, I., Temcinas, T., Gerz, D., Henderson, M., \& Vuli\'c, I. (2020). Efficient intent detection with dual sentence encoders. In \emph{Proceedings of the 2nd Workshop on Natural Language Processing for Conversational AI} (pp. 38--45). Association for Computational Linguistics. \url{https://doi.org/10.18653/v1/2020.nlp4convai-1.5}
+
+\bibitem[Chen et~al.(2024)]{chen2024inside}
+Chen, C., Liu, K., Chen, Z., Gu, Y., Wu, Y., Tao, M., Fu, Z., \& Ye, J. (2024). INSIDE: LLMs' internal states retain the power of hallucination detection [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2402.03744}
+
+\bibitem[Clark et~al.(2018)]{clark2018arc}
+Clark, P., Cowhey, I., Etzioni, O., Khot, T., Sabharwal, A., Schoenick, C., \& Tafjord, O. (2018). Think you have solved question answering? Try ARC, the AI2 Reasoning Challenge [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/1803.05457}
+
+\bibitem[Clark et~al.(2019)]{clark2019boolq}
+Clark, C., Lee, K., Chang, M.-W., Kwiatkowski, T., Collins, M., \& Toutanova, K. (2019). BoolQ: Exploring the surprising difficulty of natural yes/no questions. In \emph{Proceedings of NAACL-HLT 2019} (pp. 2924--2936). Association for Computational Linguistics. \url{https://doi.org/10.18653/v1/N19-1300}
+
+\bibitem[DeepSeek-AI(2025)]{deepseek2025r1}
+DeepSeek-AI. (2025). DeepSeek-R1: Incentivizing reasoning capability in LLMs via reinforcement learning [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2501.12948}
+
+\bibitem[Dubey et~al.(2024)]{dubey2024llama3}
+Dubey, A., Jauhri, A., Pandey, A., Kadian, A., Al-Dahle, A., Letman, A., et~al. (2024). The Llama 3 herd of models [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2407.21783}
+
+\bibitem[Farquhar et~al.(2024)]{farquhar2024semanticentropy}
+Farquhar, S., Kossen, J., Kuhn, L., \& Gal, Y. (2024). Detecting hallucinations in large language models using semantic entropy. \emph{Nature, 630}, 625--630. \url{https://doi.org/10.1038/s41586-024-07421-0}
+
+\bibitem[Geifman and El-Yaniv(2017)]{geifman2017selective}
+Geifman, Y., \& El-Yaniv, R. (2017). Selective classification for deep neural networks. In \emph{Advances in Neural Information Processing Systems 30}.
+
+\bibitem[Geifman et~al.(2019)]{geifman2019selectivenet}
+Geifman, Y., Uziel, G., \& El-Yaniv, R. (2019). SelectiveNet: A deep neural network with an integrated reject option. In \emph{Proceedings of the 36th International Conference on Machine Learning} (pp. 2151--2159). PMLR.
+
+\bibitem[Gemma Team et~al.(2024)]{gemmateam2024gemma2}
+Gemma Team, Riviere, M., Pathak, S., Sessa, P. G., Hardin, C., Bhupatiraju, S., et~al. (2024). Gemma 2: Improving open language models at a practical size [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2408.00118}
+
+\bibitem[Guo et~al.(2017)]{guo2017calibration}
+Guo, C., Pleiss, G., Sun, Y., \& Weinberger, K. Q. (2017). On calibration of modern neural networks. In \emph{Proceedings of the 34th International Conference on Machine Learning} (pp. 1321--1330). PMLR.
+
+\bibitem[Hendrycks and Gimpel(2017)]{hendrycks2017baseline}
+Hendrycks, D., \& Gimpel, K. (2017). A baseline for detecting misclassified and out-of-distribution examples in neural networks. In \emph{International Conference on Learning Representations}.
+
+\bibitem[Hendrycks et~al.(2021)]{hendrycks2021mmlu}
+Hendrycks, D., Burns, C., Basart, S., Zou, A., Mazeika, M., Song, D., \& Steinhardt, J. (2021). Measuring massive multitask language understanding. In \emph{International Conference on Learning Representations}.
+
+\bibitem[Ji et~al.(2024)]{ji2024internal}
+Ji, Z., Lee, N., Frieske, R., Yu, T., Su, D., Xu, Y., Ishii, E., Bang, Y. J., Madotto, A., \& Fung, P. (2024). LLM internal states reveal hallucination risk faced with a query. In \emph{Proceedings of the 7th BlackboxNLP Workshop}.
+
+\bibitem[Jiang et~al.(2023)]{jiang2023mistral}
+Jiang, A. Q., Sablayrolles, A., Mensch, A., Bamford, C., Chaplot, D. S., de las Casas, D., et~al. (2023). Mistral 7B [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2310.06825}
+
+\bibitem[Jolliffe(2002)]{jolliffe2002pca}
+Jolliffe, I. T. (2002). \emph{Principal component analysis} (2nd ed.). Springer. \url{https://doi.org/10.1007/b98835}
+
+\bibitem[Kadavath et~al.(2022)]{kadavath2022lmknow}
+Kadavath, S., Conerly, T., Askell, A., Henighan, T., Drain, D., Perez, E., Schiefer, N., et~al. (2022). Language models (mostly) know what they know [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2207.05221}
+
+\bibitem[Kirichenko et~al.(2025)]{kirichenko2025abstentionbench}
+Kirichenko, P., Ibrahim, M., Chaudhuri, K., \& Bell, S. J. (2025). AbstentionBench: Reasoning LLMs fail on unanswerable questions [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2506.09038}
+
+\bibitem[Lehmann et~al.(2015)]{lehmann2015dbpedia}
+Lehmann, J., Isele, R., Jakob, M., Jentzsch, A., Kontokostas, D., Mendes, P. N., et~al. (2015). DBpedia---A large-scale, multilingual knowledge base extracted from Wikipedia. \emph{Semantic Web, 6}(2), 167--195. \url{https://doi.org/10.3233/SW-140134}
+
+\bibitem[Li and Roth(2002)]{li2002trec}
+Li, X., \& Roth, D. (2002). Learning question classifiers. In \emph{Proceedings of the 19th International Conference on Computational Linguistics} (pp. 1--7). \url{https://doi.org/10.3115/1072228.1072378}
+
+\bibitem[Manakul et~al.(2023)]{manakul2023selfcheckgpt}
+Manakul, P., Liusie, A., \& Gales, M. J. F. (2023). SelfCheckGPT: Zero-resource black-box hallucination detection for generative large language models. In \emph{Proceedings of EMNLP 2023} (pp. 9004--9017). Association for Computational Linguistics. \url{https://doi.org/10.18653/v1/2023.emnlp-main.557}
+
+\bibitem[Mihaylov et~al.(2018)]{mihaylov2018openbookqa}
+Mihaylov, T., Clark, P., Khot, T., \& Sabharwal, A. (2018). Can a suit of armor conduct electricity? A new dataset for open book question answering. In \emph{Proceedings of EMNLP 2018} (pp. 2381--2391). Association for Computational Linguistics. \url{https://doi.org/10.18653/v1/D18-1260}
+
+\bibitem[Nazim-E-Alam et~al.(2026)]{nazim2026artifact}
+Nazim-E-Alam, Farid, F. A., Islam, S. A., Abdullah-Al-Jubair, Rahman, S., Mridha, M. F., Uddin, J., \& Karim, H. A. (2026). \emph{Reproducibility package for cost-aware reliability signal selection in finite-choice small language models} (Version 1.0.1) [Data set and software]. Zenodo. \url{https://doi.org/10.5281/zenodo.20732806}
+
+\bibitem[OLMo Team(2025)]{olmo22025}
+OLMo Team. (2025). 2 OLMo 2 Furious [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2501.00656}
+
+\bibitem[Orgad et~al.(2024)]{orgad2024llms}
+Orgad, H., Toker, M., Gekhman, Z., Reichart, R., Szpektor, I., Kotek, H., \& Belinkov, Y. (2024). LLMs know more than they show: On the intrinsic representation of LLM hallucinations [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2410.02707}
+
+\bibitem[Paszke et~al.(2019)]{paszke2019pytorch}
+Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., et~al. (2019). PyTorch: An imperative style, high-performance deep learning library. In \emph{Advances in Neural Information Processing Systems 32}.
+
+\bibitem[Pedregosa et~al.(2011)]{pedregosa2011sklearn}
+Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M., et~al. (2011). Scikit-learn: Machine learning in Python. \emph{Journal of Machine Learning Research, 12}, 2825--2830.
+
+\bibitem[Talmor et~al.(2019)]{talmor2019commonsenseqa}
+Talmor, A., Herzig, J., Lourie, N., \& Berant, J. (2019). CommonsenseQA: A question answering challenge targeting commonsense knowledge. In \emph{Proceedings of NAACL-HLT 2019} (pp. 4149--4158). Association for Computational Linguistics. \url{https://doi.org/10.18653/v1/N19-1421}
+
+\bibitem[Technology Innovation Institute(2025)]{falcon3modelcard}
+Technology Innovation Institute. (2025). \emph{Falcon3-7B-Instruct model card} [Model card]. Hugging Face. \url{https://huggingface.co/tiiuae/Falcon3-7B-Instruct}
+
+\bibitem[Wang et~al.(2023)]{wang2023selfconsistency}
+Wang, X., Wei, J., Schuurmans, D., Le, Q. V., Chi, E. H., Narang, S., Chowdhery, A., \& Zhou, D. (2023). Self-consistency improves chain-of-thought reasoning in language models. In \emph{International Conference on Learning Representations}.
+
+\bibitem[Wang et~al.(2025)]{wang2025ubench}
+Wang, X., Zhang, Z., Li, Q., Chen, G., Hu, M., Li, Z., Luo, B., Gao, H., Han, Z., \& Wang, H. (2025). Benchmarking uncertainty in large language models with multiple-choice questions. In \emph{Findings of the Association for Computational Linguistics}.
+
+\bibitem[Wen et~al.(2025)]{wen2025limits}
+Wen, B., Yao, J., Feng, S., Xu, C., Tsvetkov, Y., Howe, B., \& Wang, L. L. (2025). Know your limits: A survey of abstention in large language models. \emph{Transactions of the Association for Computational Linguistics, 13}.
+
+\bibitem[Wolf et~al.(2020)]{wolf2020transformers}
+Wolf, T., Debut, L., Sanh, V., Chaumond, J., Delangue, C., Moi, A., Cistac, P., et~al. (2020). Transformers: State-of-the-art natural language processing. In \emph{Proceedings of EMNLP 2020: System Demonstrations} (pp. 38--45). Association for Computational Linguistics. \url{https://doi.org/10.18653/v1/2020.emnlp-demos.6}
+
+\bibitem[Yang et~al.(2024)]{yang2024qwen}
+Yang, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Li, C., Liu, D., Huang, F., Wei, H., et~al. (2024). Qwen2.5 technical report [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2412.15115}
+
+\bibitem[Zellers et~al.(2019)]{zellers2019hellaswag}
+Zellers, R., Holtzman, A., Bisk, Y., Farhadi, A., \& Choi, Y. (2019). HellaSwag: Can a machine really finish your sentence? In \emph{Proceedings of ACL 2019} (pp. 4791--4800). Association for Computational Linguistics. \url{https://doi.org/10.18653/v1/P19-1472}
+
+\bibitem[Zhang et~al.(2015)]{zhang2015character}
+Zhang, X., Zhao, J., \& LeCun, Y. (2015). Character-level convolutional networks for text classification. In \emph{Advances in Neural Information Processing Systems 28}.
+
+\bibitem[Zhang et~al.(2024)]{zhang2024tinyllama}
+Zhang, P., Zeng, G., Wang, T., \& Lu, W. (2024). TinyLlama: An open-source small language model [Preprint]. \emph{arXiv}. \url{https://arxiv.org/abs/2401.02385}
+
+\end{thebibliography}
+
+\end{document}

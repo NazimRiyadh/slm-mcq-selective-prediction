@@ -1,0 +1,14 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Feature-schema audit for the 24 primary MCQ conditions. The archived family name \texttt{confidence\_option} is retained in released CSV files, but the manuscript uses terminology that reflects the actual columns.}
+\label{tab:feature-schema-audit}
+\begin{tabularx}{\textwidth}{p{0.27\textwidth}p{0.14\textwidth}X}
+\toprule
+Model group & Conditions & Archived lower-dimensional feature schema \\
+\midrule
+Gemma-2-9B-IT; Llama-3.1-8B-Instruct & 8 & Strict output-only: top probability, margin, entropy, and number of options where available. \\
+Falcon3-7B-Instruct; Mistral-7B-Instruct-v0.3; OLMo-2-7B-Instruct; Qwen2.5-7B-Instruct & 16 & Output probabilities/logits, margins, entropy, and option count, plus three scalar layer-maximum columns (early, late, and final). \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,0 +1,25 @@
+model,dataset,cheap_cols,contains_internal_scalar,baseline_schema
+falcon3_7b_instruct,arc_challenge,n_options|p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer7_max|late_layer21_max|final_layer28_max,True,output scores + scalar layer maxima
+falcon3_7b_instruct,commonsenseqa,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|prob_E|logit_A|logit_B|logit_C|logit_D|logit_E|early_layer7_max|late_layer21_max|final_layer28_max,True,output scores + scalar layer maxima
+falcon3_7b_instruct,hellaswag,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer7_max|late_layer21_max|final_layer28_max,True,output scores + scalar layer maxima
+falcon3_7b_instruct,mmlu,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer7_max|late_layer21_max|final_layer28_max,True,output scores + scalar layer maxima
+gemma2_9b_it,arc_challenge,n_options|top_prob|margin|entropy,False,strict output-only
+gemma2_9b_it,commonsenseqa,top_prob|margin|entropy,False,strict output-only
+gemma2_9b_it,hellaswag,top_prob|margin|entropy,False,strict output-only
+gemma2_9b_it,mmlu,top_prob|margin|entropy,False,strict output-only
+llama31_8b_instruct,arc_challenge,n_options|top_prob|margin|entropy,False,strict output-only
+llama31_8b_instruct,commonsenseqa,top_prob|margin|entropy,False,strict output-only
+llama31_8b_instruct,hellaswag,top_prob|margin|entropy,False,strict output-only
+llama31_8b_instruct,mmlu,top_prob|margin|entropy,False,strict output-only
+mistral7b_v03,arc_challenge,n_options|p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer8_max|late_layer24_max|final_layer32_max,True,output scores + scalar layer maxima
+mistral7b_v03,commonsenseqa,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|prob_E|logit_A|logit_B|logit_C|logit_D|logit_E|early_layer8_max|late_layer24_max|final_layer32_max,True,output scores + scalar layer maxima
+mistral7b_v03,hellaswag,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer8_max|late_layer24_max|final_layer32_max,True,output scores + scalar layer maxima
+mistral7b_v03,mmlu,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer8_max|late_layer24_max|final_layer32_max,True,output scores + scalar layer maxima
+olmo2_7b_instruct,arc_challenge,n_options|p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer8_max|late_layer24_max|final_layer32_max,True,output scores + scalar layer maxima
+olmo2_7b_instruct,commonsenseqa,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|prob_E|logit_A|logit_B|logit_C|logit_D|logit_E|early_layer8_max|late_layer24_max|final_layer32_max,True,output scores + scalar layer maxima
+olmo2_7b_instruct,hellaswag,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer8_max|late_layer24_max|final_layer32_max,True,output scores + scalar layer maxima
+olmo2_7b_instruct,mmlu,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer8_max|late_layer24_max|final_layer32_max,True,output scores + scalar layer maxima
+qwen25_7b,arc_challenge,n_options|p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer7_max|late_layer21_max|final_layer28_max,True,output scores + scalar layer maxima
+qwen25_7b,commonsenseqa,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|prob_E|logit_A|logit_B|logit_C|logit_D|logit_E|early_layer7_max|late_layer21_max|final_layer28_max,True,output scores + scalar layer maxima
+qwen25_7b,hellaswag,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer7_max|late_layer21_max|final_layer28_max,True,output scores + scalar layer maxima
+qwen25_7b,mmlu,p_max|prob_margin|entropy|logit_margin|prob_A|prob_B|prob_C|prob_D|logit_A|logit_B|logit_C|logit_D|early_layer7_max|late_layer21_max|final_layer28_max,True,output scores + scalar layer maxima

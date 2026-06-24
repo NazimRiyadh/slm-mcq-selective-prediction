@@ -1,0 +1,29 @@
+\begin{table}[H]
+\centering
+\small
+\caption{Model and dataset identifiers used by the reproducibility artifact. The per-file metadata and example identifiers in the archive are authoritative for exact source splits and sampled rows.}
+\label{tab:artifact-identifiers}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lll}
+\toprule
+Type & Manuscript name & Public identifier / artifact source \\
+\midrule
+Model & Qwen2.5-7B-Instruct & \texttt{Qwen/Qwen2.5-7B-Instruct} \\
+Model & Mistral-7B-Instruct-v0.3 & \texttt{mistralai/Mistral-7B-Instruct-v0.3} \\
+Model & Falcon3-7B-Instruct & \texttt{tiiuae/Falcon3-7B-Instruct} \\
+Model & OLMo-2-1124-7B-Instruct & \texttt{allenai/OLMo-2-1124-7B-Instruct} \\
+Model & Gemma-2-9B-IT & \texttt{google/gemma-2-9b-it} \\
+Model & Llama-3.1-8B-Instruct & \texttt{meta-llama/Llama-3.1-8B-Instruct} \\
+Stress model & DeepSeek-R1-Distill-Qwen-7B & \texttt{deepseek-ai/DeepSeek-R1-Distill-Qwen-7B} \\
+Dataset & ARC-Challenge & \texttt{allenai/ai2\_arc}, configuration \texttt{ARC-Challenge}; archived subset $n=299$ \\
+Dataset & CommonsenseQA & \texttt{tau/commonsense\_qa}; archived subset $n=1000$ \\
+Dataset & HellaSwag & \texttt{Rowan/hellaswag}; archived subset $n=1000$ \\
+Dataset & MMLU & \texttt{cais/mmlu}; aggregate archived condition $n=1000$ \\
+Auxiliary & AG News & Standard AG News \texttt{test.csv}; balanced archived sample \\
+Auxiliary & TREC & Standard \texttt{train\_5500}; \texttt{CogComp/trec} fallback in extractor \\
+Auxiliary & DBPedia-14 & Standard DBPedia-14 test split; balanced archived sample \\
+Auxiliary & Banking77 & Standard Banking77 intent-label source; archived high-cardinality sample \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

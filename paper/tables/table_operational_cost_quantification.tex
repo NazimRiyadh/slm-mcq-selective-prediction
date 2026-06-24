@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Operational tiers represented in the reliability audit. Candidate counts are per model--dataset--seed split. The broad compact baseline is heterogeneous, so output-only and compact internal-summary costs are distinguished.}
+\label{tab:operational-cost-quantification}
+\begin{threeparttable}
+\begin{tabularx}{\textwidth}{p{0.25\textwidth}X}
+\toprule
+Signal tier & Acquisition and maintenance burden \\
+\midrule
+Strict output-only & One forced-choice scoring pass; probabilities/logits, margins, entropy, and option count; 3 logistic $C$ candidates; no activation retention. This tier is directly represented by the eight Gemma/Llama MCQ conditions. \\
+Compact internal summaries & Forced-choice scores plus white-box hooks for three scalar layer-maximum summaries; negligible feature storage relative to full vectors, but model access and extraction maintenance are still required. This tier appears in sixteen broad-analysis conditions. \\
+PCA-hidden only & Full hidden-vector extraction and retention, train-fitted scaling/PCA, and $3$ PCA dimensions $\times$ $3$ logistic $C$ values = 9 candidates per seed. \\
+Compact/output + PCA hidden & Lower-dimensional baseline plus full-vector extraction and PCA; 9 candidates per seed. \\
+Five-sample agreement & No activation storage is required, but repeated generation multiplies inference latency and introduces decoding-control choices. \\
+Raw activation storage & A hidden matrix with $n$ examples, dimension $d$, and $b$ bytes/value requires $ndb/2^{20}$ MiB. For 1000 examples, dimensions 3584--4096 require approximately 13.7--15.6 MiB in float32 or 6.8--7.8 MiB in float16 before compression. \\
+Ongoing burden & Feature-retention policy, target labels, probe retraining, calibration monitoring, model-version changes, and distribution-shift revalidation. \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}[flushleft]\footnotesize\item The table separates access cost from storage and fitting cost. A scalar internal summary is lower-dimensional than a full vector but is not black-box evidence.\end{tablenotes}
+\end{threeparttable}
+\end{table}

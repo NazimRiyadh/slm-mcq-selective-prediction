@@ -1,70 +1,95 @@
-# Reproducibility package
+# Reproducibility guide
 
-This package accompanies the manuscript:
-
-**When Do Hidden-State Probes Add Deployable Value? A Cost-Aware Locked Validation Study of Finite-Choice Small Language Models**
-
-## What is included
-
-- `SLM_FiniteChoice_Q1_Final_BroadNonMCQ.pdf`: final revised manuscript PDF.
-- `SLM_FiniteChoice_Q1_Final_BroadNonMCQ.tex`: final revised LaTeX source.
-- `figures/`: manuscript figures in PDF/PNG/SVG where available.
-- `tables/`: LaTeX tables used by the manuscript.
-- `code/locked_validation_fast_v5.py`: locked validation script.
-- `code/extract_nonmcq_finitechoice_v2.py`: broad non-MCQ extraction script for AG News, TREC, and DBPedia.
-- `code/slm_q1_broad_nonmcq_extraction_validation.ipynb`: Kaggle notebook for broad non-MCQ extraction and validation, if present.
-- `locked_validation_outputs/`: final CSV outputs used to build the paper tables.
-- `uploaded_validation_zips/USED_slm_locked_validation_outputs_q1_broad_nonmcq.zip`: uploaded validation ZIP used for the final broad non-MCQ results.
-- `RESULTS_AUDIT_BROAD_NONMCQ.md`: audit note stating which result artifact was used.
+This guide accompanies the manuscript **Cost-Aware Reliability Signal Selection for Finite-Choice Small Language Models: A Locked Validation Study**.
 
 ## Reproduction levels
 
-### Level 1: Reproduce paper tables from locked outputs
+### Level 1 — Reproduce final tables and sensitivity summaries from locked outputs
 
-Use the CSV files in `locked_validation_outputs/`. These are the final locked validation outputs used in the paper. This level does not require GPU inference or model access.
+This level requires no GPU and no model access. The required CSV files are included in:
 
-### Level 2: Rerun locked validation from feature files
+- `code/final_analysis/input_data/`
+- `results/locked_validation_outputs/`
 
-This requires the large feature archive `features_combined_q1_broad_nonmcq.zip`, containing one feature CSV, one hidden-state NPZ, and one metadata JSON per model-dataset condition. That archive is not included here unless manually added before Zenodo upload, because the chat upload only provided the locked validation outputs. If you have the Kaggle checkpoint, add it under:
-
-```text
-features/features_combined_q1_broad_nonmcq.zip
-```
-
-Then extract it and run:
+Run:
 
 ```bash
+bash run_final_analysis.sh
+```
+
+The script executes:
+
+1. `build_additional_analyses.py`
+   - seed-averaged condition effects;
+   - 50,000-replicate two-way model/dataset bootstrap;
+   - leave-one-dataset-out and leave-one-model-out analyses;
+   - failure-prevalence summaries;
+   - equal-condition and test-size-weighted summaries;
+   - alternative validation-objective and equal-search-budget sensitivity;
+   - validation-to-test degradation;
+   - practical-effect and model-level cost-utility summaries.
+2. `strict_feature_audit.py`
+   - broad compact-summary versus strict output-only schema audit;
+   - eight-condition Gemma/Llama strict output-only sensitivity;
+   - 50,000-replicate crossed sensitivity for that subset.
+
+Expected derived outputs are written to `code/final_analysis/analysis_outputs/` and mirrored in `results/final_analysis/`.
+
+### Level 2 — Rerun locked validation from archived feature files
+
+Download the large feature archive from Zenodo:
+
+- Stable DOI: `10.5281/zenodo.20732805`
+- Current published version: `10.5281/zenodo.20732806`
+
+Extract `features_combined_q1_broad_nonmcq.zip`, then use the repository's existing locked-validation script:
+
+```bash
+export SLM_FEATURE_INPUT=/absolute/path/to/extracted/features
+export SLM_LOCKED_OUTPUT=/absolute/path/to/new/output
+export SLM_BOOTSTRAP_B=50000
 python code/locked_validation_fast_v5.py
 ```
 
-with environment variables:
+The archived manuscript results were generated from five repeated stratified splits with seeds 0–4. Do not change the feature schema or candidate grid when attempting exact reproduction.
 
-```bash
-export SLM_FEATURE_INPUT=/path/to/features_combined_q1_broad_nonmcq
-export SLM_LOCKED_OUTPUT=/path/to/output_dir
-export SLM_BOOTSTRAP_B=300
-```
+### Level 3 — Regenerate auxiliary finite-choice features
 
-### Level 3: Regenerate broad non-MCQ features
-
-This requires GPU resources, Hugging Face access for gated models where applicable, and public datasets. Example:
+GPU resources and Hugging Face access are required. Example:
 
 ```bash
 export MODEL_ID=Qwen/Qwen2.5-7B-Instruct
 export MODEL_SHORT=qwen25_7b
 export TASKS=agnews,trec6,dbpedia14
-export OUTPUT_DIR=/kaggle/working/features_nonmcq_finitechoice
+export OUTPUT_DIR=/absolute/path/to/features_nonmcq_finitechoice
 export USE_4BIT=1
 python code/extract_nonmcq_finitechoice_v2.py
 ```
 
-Repeat for:
+Repeat with the model identifiers documented in the manuscript and supplement. Some checkpoints require user-side license acceptance or access approval.
 
-```text
-meta-llama/Llama-3.1-8B-Instruct -> llama31_8b_it
-mistralai/Mistral-7B-Instruct-v0.3 -> mistral7b_v03
+## Exact final-analysis commands
+
+The supplied runner executes the following commands:
+
+```bash
+python code/final_analysis/build_additional_analyses.py \
+  --data-dir code/final_analysis/input_data \
+  --out-dir code/final_analysis/analysis_outputs \
+  --tables-dir paper/tables \
+  --figures-dir paper/figures
+
+python code/final_analysis/strict_feature_audit.py \
+  --input code/final_analysis/input_data/locked_primary_selected.csv \
+  --out-dir code/final_analysis/analysis_outputs \
+  --bootstrap-reps 50000 \
+  --seed 20260623
 ```
 
-## Important limitation
+## Interpretation guardrail
 
-The package does not redistribute model weights. Some checkpoints may require user-side license acceptance or Hugging Face access approval. The large hidden-state feature archive should be uploaded to Zenodo if available; otherwise, features are regenerable from the extraction scripts and model identifiers.
+The broad 24-condition analysis is **compact reliability summaries versus compact summaries plus PCA-compressed full hidden vectors**. Only the eight Gemma-2/Llama-3.1 conditions are used for the strict output-only sensitivity. The released machine-readable family labels are preserved to maintain exact correspondence with the archived outputs.
+
+## Verification
+
+After running the scripts, compare generated files against `results/final_analysis/`. Small textual differences in generated LaTeX can occur across environments; numerical CSV outputs should agree up to normal floating-point precision.

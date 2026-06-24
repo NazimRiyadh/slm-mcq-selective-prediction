@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Validation-locked protocol for the primary analysis. The diagnostic upper-bound envelope is analyzed separately.}
+\label{tab:locked-protocol}
+\begin{threeparttable}
+\begin{tabularx}{\textwidth}{p{0.24\textwidth}X}
+\toprule
+Component & Protocol \\
+\midrule
+Split design & Each model--dataset condition is split by correctness into 60\% train, 20\% validation, and 20\% held-out test for five seeds. The seeds are overlapping resplits, not independent datasets. \\
+Feature fitting & Standardization and PCA are fitted on training data only; validation and test examples use the train-fitted transforms. \\
+Probe families & Balanced logistic reliability selectors compare the archived lower-dimensional baseline, PCA-hidden vectors, and their concatenation. The baseline is output-only in eight conditions and includes three scalar layer maxima in sixteen conditions. The full grid uses $C\in\{0.1,1,10\}$ and PCA dimensions $\{16,32,64\}$. \\
+Validation selection & The primary configuration is selected by validation AUROC within family. Sensitivity analyses select by validation AURC or Risk@80\% and equalize the candidate budget. \\
+Protected test reporting & AUROC, failure AUPRC, Risk@80\%, AURC, E-AURC, and failure capture are evaluated after validation selection. Risk@80\% is a test-ranking metric, not a transferred numerical threshold. \\
+Primary estimand & The five seed results are averaged within each of the 24 model--dataset conditions; equal-condition macro averages are reported. \\
+Dependence-aware uncertainty & A two-way bootstrap resamples model and dataset clusters independently for 50,000 replicates. Leave-one-dataset-out and leave-one-model-out estimates assess cluster sensitivity. \\
+Diagnostic envelope & Broader best-probe, layer, PCA, contrastive, and sampling analyses are supporting diagnostics and do not replace the validation-locked estimate. \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}[flushleft]\footnotesize\item The design prevents test-guided feature-family selection but does not constitute a preregistered equivalence study.\end{tablenotes}
+\end{threeparttable}
+\end{table}

@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Stronger hidden-state probe sensitivity on Gemma-2-9B-IT and Llama-3.1-8B-Instruct.}
+\label{tab:contrastive}
+\resizebox{0.98\linewidth}{!}{%
+\begin{tabular}{lccc}
+\toprule
+Feature family & Cases & Mean AUROC & SD \\
+\midrule
+Confidence/option & 8 & 0.826 & 0.048 \\
+PCA hidden emb. & 8 & 0.794 & 0.046 \\
+Conf./option + PCA hidden & 8 & 0.829 & 0.045 \\
+Contrastive hidden & 8 & 0.746 & 0.043 \\
+Conf./option + contrastive & 8 & 0.772 & 0.040 \\
+\bottomrule
+\end{tabular}
+}%
+
+\par\smallskip
+\begin{minipage}{0.96\linewidth}\footnotesize\textit{Note.} The supervised contrastive hidden-state probe was added specifically to test whether the hidden-state conclusion was caused by weak probing. It did not outperform confidence/option baselines in this run, strengthening the redundancy interpretation.\end{minipage}
+\end{table}

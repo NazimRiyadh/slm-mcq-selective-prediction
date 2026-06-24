@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Selection-objective and search-budget sensitivity for combined PCA-hidden augmentation minus the confidence/option selector. Equal-budget analysis fixes PCA dimension at 32, leaving three regularization candidates in each family. Positive deltas favor augmentation for AUROC/AUPRC and disfavor it for Risk@80\%/AURC.}
+\label{tab:selection-sensitivity}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+Selection scheme & $\Delta$ AUROC & $\Delta$ AUPRC & $\Delta$ Risk@80\% & $\Delta$ AURC \\
+\midrule
+Validation AUROC, full grid & -0.0169 & -0.0124 & +0.0017 & +0.0046 \\
+Validation AURC, full grid & -0.0176 & -0.0122 & +0.0024 & +0.0058 \\
+Validation Risk@80\%, full grid & -0.0156 & -0.0087 & +0.0023 & +0.0047 \\
+Validation AUROC, equal budget (PCA=32) & -0.0233 & -0.0166 & +0.0043 & +0.0067 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

@@ -1,0 +1,5 @@
+metric,posthoc_beneficial_threshold,mean_delta,conditions_any_benefit,conditions_meeting_threshold,n_conditions
+AUROC,0.01,-0.01689471453040041,12,1,24
+AUPRC-fail,0.01,-0.012398967407600853,8,5,24
+Risk@80%,-0.01,0.001666666666666665,9,3,24
+AURC,-0.005,0.004584373048780538,11,5,24

@@ -1,0 +1,18 @@
+\begin{table}[H]
+\centering
+\small
+\caption{Model-level feature-schema manifest for the primary MCQ analysis. The same schema applies across the four MCQ datasets, except that \texttt{n\_options} appears where variable option counts are recorded.}
+\label{tab:feature-schema-manifest}
+\begin{tabularx}{\textwidth}{p{0.27\textwidth}p{0.22\textwidth}X}
+\toprule
+Model & Manuscript interpretation & Distinguishing archived columns \\
+\midrule
+Gemma-2-9B-IT & Strict output-only & \texttt{top\_prob}, \texttt{margin}, \texttt{entropy}, optional \texttt{n\_options} \\
+Llama-3.1-8B-Instruct & Strict output-only & \texttt{top\_prob}, \texttt{margin}, \texttt{entropy}, optional \texttt{n\_options} \\
+Falcon3-7B-Instruct & Compact summary & Output probability/logit columns plus \texttt{early\_layer7\_max}, \texttt{late\_layer21\_max}, \texttt{final\_layer28\_max} \\
+Mistral-7B-Instruct-v0.3 & Compact summary & Output probability/logit columns plus \texttt{early\_layer8\_max}, \texttt{late\_layer24\_max}, \texttt{final\_layer32\_max} \\
+OLMo-2-7B-Instruct & Compact summary & Output probability/logit columns plus \texttt{early\_layer8\_max}, \texttt{late\_layer24\_max}, \texttt{final\_layer32\_max} \\
+Qwen2.5-7B-Instruct & Compact summary & Output probability/logit columns plus \texttt{early\_layer7\_max}, \texttt{late\_layer21\_max}, \texttt{final\_layer28\_max} \\
+\bottomrule
+\end{tabularx}
+\end{table}

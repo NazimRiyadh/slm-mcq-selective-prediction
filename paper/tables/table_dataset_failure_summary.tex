@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Primary-dataset difficulty and held-out failure prevalence. Accuracy is averaged over the six models; failure counts summarize the 30 model--seed test splits per dataset. Sparse-failure rows are most common for ARC-Challenge and motivate prevalence-aware interpretation of AUPRC.}
+\label{tab:dataset-failure-summary}
+\begin{adjustbox}{width=\textwidth}
+\begin{tabular}{lrrrrrr}
+\toprule
+Dataset & $n$ & Accuracy mean [range] & Test failures mean [range] & $<10$ & $<20$ & Splits \\
+\midrule
+ARC-Challenge & 299 & 0.828 [0.736, 0.920] & 10.3 [5, 16] & 10 & 30 & 30 \\
+CommonsenseQA & 1000 & 0.762 [0.707, 0.824] & 47.6 [35, 59] & 0 & 0 & 30 \\
+HellaSwag & 1000 & 0.728 [0.628, 0.836] & 54.4 [33, 74] & 0 & 0 & 30 \\
+MMLU & 1000 & 0.629 [0.549, 0.727] & 74.3 [54, 90] & 0 & 0 & 30 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}

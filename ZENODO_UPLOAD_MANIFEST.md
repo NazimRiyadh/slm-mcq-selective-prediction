@@ -1,30 +1,14 @@
-# Zenodo upload manifest
+# Zenodo archive status
 
-Upload this full package to Zenodo after creating a GitHub release.
+The current published Zenodo record is Version 1.0.1:
 
-## Include in Zenodo now
+- Version DOI: `10.5281/zenodo.20732806`
+- All-versions DOI: `10.5281/zenodo.20732805`
 
-- Full revised manuscript PDF and LaTeX source.
-- Code scripts and notebook.
-- Final locked validation outputs.
-- Manuscript figures and LaTeX tables.
-- Result audit notes.
-- `README_REPRODUCIBILITY.md`, `CITATION.cff`, `LICENSE`, and environment files.
+The record includes:
 
-## Strongly recommended manual addition
+- `features_combined_q1_broad_nonmcq.zip` (per-example feature CSV files, hidden-state NPZ arrays, and metadata JSON files);
+- locked validation output archives;
+- reproducibility documentation.
 
-If available from Kaggle/local storage, add the large feature archive before Zenodo upload:
-
-```text
-features/features_combined_q1_broad_nonmcq.zip
-```
-
-Expected content of that archive:
-
-```text
-38 feature CSV files
-38 hidden NPZ files
-38 metadata JSON files
-```
-
-This allows reviewers to rerun locked validation without rerunning model inference. The current package already allows reviewers to verify the reported tables from locked validation CSV outputs and to regenerate features from public models/datasets, but it does not include the large hidden-state NPZ archive unless you add it manually.
+For a synchronized Version 1.0.2, add the exact final manuscript/source package, final-analysis scripts and outputs, updated `README.md`, `README_REPRODUCIBILITY.md`, `REPRODUCIBILITY_MANIFEST.md`, and `CITATION.cff`. After publication, verify the new version-specific DOI and update repository metadata if needed. The stable all-versions DOI may remain in badges and general links.

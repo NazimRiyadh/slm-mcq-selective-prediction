@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Reproducibility checklist for the manuscript package.}
+\label{tab:reproducibility}
+\begin{threeparttable}
+
+\begin{tabular}{p{0.36\textwidth}p{0.55\textwidth}}
+\toprule
+Item & Status in this manuscript package \\
+\midrule
+Raw result summaries & Archived as CSV files in the public repository and Zenodo package. \\
+Figure scripts / notebooks & Included in the public reproducibility repository. \\
+Random seeds & The primary validation-locked evaluator uses seeds 0, 1, 2, 3, and 4. Separate diagnostic analyses retain their archived seed metadata. \\
+Environment metadata & Included as requirements/environment metadata in the reproducibility folder. \\
+Repository & \href{https://github.com/NazimRiyadh/slm-mcq-selective-prediction}{Public GitHub repository}. \\
+Zenodo archive & \href{https://doi.org/10.5281/zenodo.20732806}{Version 1.0.1 reproducibility record}. \\
+Model access & Model weights are not redistributed; gated checkpoints require user-side access approval. \\
+\bottomrule
+\end{tabular}
+
+\begin{tablenotes}[flushleft]\footnotesize\item \parbox{0.95\textwidth}{The repository and Zenodo archive contain code, configuration metadata, processed outputs, figures, environment files, and per-example features needed to reproduce the locked analyses without repeating model inference.}\end{tablenotes}
+\end{threeparttable}
+\end{table}

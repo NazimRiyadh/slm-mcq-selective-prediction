@@ -1,0 +1,18 @@
+# Locked validation fast v5 outputs
+
+Primary analysis excludes DeepSeek stress-test. Cost utility uses paired rows only.
+
+## Primary summary
+
+| family                |   rows |   conditions |   test_auroc_correct_mean |   test_auroc_correct_std |   test_auprc_failure_mean |   test_auprc_failure_std |   test_risk_at_80_mean |   test_risk_at_80_std |   test_risk_at_60_mean |   test_risk_at_60_std |   test_risk_at_40_mean |   test_risk_at_40_std |   test_aurc_mean |   test_aurc_std |   test_eaurc_mean |   test_eaurc_std |   test_failure_precision_at_20_abstain_mean |   test_failure_precision_at_20_abstain_std |   test_failure_recall_at_20_abstain_mean |   test_failure_recall_at_20_abstain_std |
+|:----------------------|-------:|-------------:|--------------------------:|-------------------------:|--------------------------:|-------------------------:|-----------------------:|----------------------:|-----------------------:|----------------------:|-----------------------:|----------------------:|-----------------:|----------------:|------------------:|-----------------:|--------------------------------------------:|-------------------------------------------:|-----------------------------------------:|----------------------------------------:|
+| cheap_plus_hidden_pca |    170 |           34 |                  0.8056   |                0.0796296 |                  0.597967 |                 0.150604 |               0.185323 |              0.116483 |               0.127616 |             0.088718  |              0.0794336 |             0.0576738 |         0.11567  |       0.0703032 |         0.0678352 |        0.0382138 |                                    0.573824 |                                   0.189655 |                                 0.489254 |                                0.164761 |
+| confidence_option     |    170 |           34 |                  0.814161 |                0.0666775 |                  0.597944 |                 0.127091 |               0.185897 |              0.11716  |               0.126508 |             0.0991439 |              0.0777004 |             0.0677322 |         0.11341  |       0.0742764 |         0.0655753 |        0.0401405 |                                    0.570315 |                                   0.174691 |                                 0.491119 |                                0.154731 |
+| hidden_pca            |    170 |           34 |                  0.749611 |                0.118958  |                  0.523935 |                 0.190702 |               0.202359 |              0.114357 |               0.152124 |             0.0923925 |              0.109353  |             0.0815717 |         0.139319 |       0.0813185 |         0.0914843 |        0.0579183 |                                    0.505973 |                                   0.211315 |                                 0.425411 |                                0.178798 |
+
+## Paired cost utility
+
+| family                |   paired_conditions_seeded |   mean_risk_at_80 |   expected_errors_among_800_answered_per_1000_queries |   additional_errors_avoided_vs_conf_option |
+|:----------------------|---------------------------:|------------------:|------------------------------------------------------:|-------------------------------------------:|
+| confidence_option     |                        170 |          0.185897 |                                               148.718 |                                   0        |
+| cheap_plus_hidden_pca |                        170 |          0.185323 |                                               148.258 |                                   0.459511 |

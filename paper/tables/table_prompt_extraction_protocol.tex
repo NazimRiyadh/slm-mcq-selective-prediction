@@ -1,0 +1,20 @@
+\begin{table}[H]
+\centering
+\small
+\caption{Prompt, scoring, hidden-state, and selector implementation record.}
+\label{tab:prompt-extraction-protocol}
+\begin{tabularx}{\textwidth}{p{0.25\textwidth}X}
+\toprule
+Item & Implemented protocol \\
+\midrule
+Finite-choice prompt & The input text or question is followed by an explicitly labeled candidate list. The auxiliary extractor instructs the model to classify into exactly one category and to return only the answer letter. The model-specific chat template is applied when available. \\
+Candidate scoring & Candidate answer letters are scored under the same prompt by mean token log likelihood. The predicted class is the highest-scoring candidate. Maximum sequence length is 768 and option batch size is four in the public auxiliary extractor. \\
+Lower-dimensional baseline & Strict output-only in eight Gemma/Llama conditions. In sixteen other conditions, output columns are accompanied by three scalar layer-maximum columns; these are interpreted as compact internal summaries, not black-box features. \\
+Hidden vector & Auxiliary extraction uses the final non-padding prompt token from the final transformer layer, before candidate-completion scoring. The locked evaluator uses an archived 2-D hidden matrix directly or the final stored layer when a 3-D stack is supplied. \\
+Precision & Auxiliary extraction defaults to NF4 4-bit model weights with double quantization and FP16 computation. Hardware- and checkpoint-specific deviations are recorded in the run metadata. \\
+Reliability model & Balanced logistic regression with liblinear solver, maximum 1000 iterations, and $C\in\{0.1,1,10\}$. PCA dimensions are $\{16,32,64\}$ and are fitted on training data only. \\
+Primary selection & Configuration selected by validation AUROC; validation AURC, validation Risk@80\%, and equal-budget PCA=32 analyses are reported as sensitivities. \\
+Test use & The selected configuration is evaluated on the corresponding held-out split. Risk@80\% ranks the test scores and retains the top 80\%; it is not a transferred threshold. \\
+\bottomrule
+\end{tabularx}
+\end{table}

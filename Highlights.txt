@@ -1,0 +1,7 @@
+Highlights
+
+- Validation-locked evaluation spans six models and four MCQ benchmarks.
+- Compact reliability summaries match or outperform full hidden-vector probes.
+- Dependence-aware analyses show no stable average gain from hidden vectors.
+- Auxiliary tasks reveal condition-specific benefits from hidden-state features.
+- Cost and selective-risk evidence supports a staged signal-selection policy.

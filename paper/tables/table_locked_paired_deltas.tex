@@ -1,0 +1,20 @@
+
+\begin{table}[t]
+\centering
+\small
+\caption{Paired locked-test deltas for hidden augmentation relative to the confidence/option selector. Deltas are computed within the same model--dataset--seed condition. Positive deltas are beneficial for AUROC, AUPRC, and failure recall, but harmful for Risk@80\% and AURC. Confidence intervals use paired bootstrap over condition--seed pairs.}
+\label{tab:locked-paired-deltas}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{lrrrr}
+\toprule
+Metric & Mean $\Delta$ & 95\% CI & Wilcoxon $p$ & Sign pattern \\
+\midrule
+$\Delta$ AUROC & -0.0169 & [-0.0292, -0.0069] & 0.0137 & 49/71 \\
+$\Delta$ AUPRC-fail & -0.0124 & [-0.0223, -0.0030] & 0.0343 & 47/73 \\
+$\Delta$ Risk@80\% & 0.0017 & [-0.0016, 0.0049] & 0.327 & 51/45 \\
+$\Delta$ AURC & 0.0046 & [0.0008, 0.0085] & 0.11 & 62/58 \\
+$\Delta$ fail recall@20\% abstain & -0.0118 & [-0.0301, 0.0047] & 0.4 & 45/51 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
